@@ -31,10 +31,14 @@ API_HEADERS = {
 # API constraints discovered via benchmarking
 MAX_OFFER_CATEGORY_LIMIT = 25  # API returns 400 for anything above 25
 SEARCH_OFFERS_PAGE_SIZE = 48   # search-offers returns up to 48 per page
-DELAY_BETWEEN_CALLS = 0.1       # seconds between API calls to avoid rate-limiting
 MAX_RETRIES = 2
 RETRY_BACKOFF = 1.5             # seconds, multiplied by attempt number
 PARALLEL_CATEGORIES = 4         # concurrent category fetches per store
+
+# Global rate limiting — enforces max request rate across ALL threads
+GLOBAL_MIN_INTERVAL = 0.3       # seconds between requests (~3.3 req/s)
+MAX_429_RETRIES = 3              # retry attempts on HTTP 429
+INITIAL_429_BACKOFF = 5.0        # first 429 backoff; doubles each retry
 
 # Helsinki geo-filtering
 HELSINKI_LAT = 60.1699
@@ -51,6 +55,10 @@ _cf_user_agent: str = ""
 _init_lock = threading.Lock()  # one-time initialisation guard
 _initialised = False
 _thread_local = threading.local()  # per-thread curl_cffi sessions
+
+# Global rate-limiter state
+_rate_lock = threading.Lock()
+_last_request_time = 0.0
 
 
 def _ensure_session():
@@ -515,16 +523,55 @@ def _build_query_string(params: dict) -> str:
     return urlencode({k: v for k, v in params.items() if v is not None})
 
 
+def _rate_limit_wait():
+    """Reserve the next request slot and sleep until it arrives.
+
+    Uses a lock-free reservation pattern: each caller reserves a future
+    timestamp (at least GLOBAL_MIN_INTERVAL after the previous one),
+    then sleeps outside the lock so other threads can also reserve.
+    """
+    global _last_request_time
+    with _rate_lock:
+        now = time.monotonic()
+        wait_time = max(0.0, GLOBAL_MIN_INTERVAL - (now - _last_request_time))
+        _last_request_time = now + wait_time
+    if wait_time > 0:
+        time.sleep(wait_time)
+
+
 def _http_request(
     method: str, url: str, body: dict | None = None,
 ) -> _FetchResponse:
-    """Make an HTTP request using the per-thread curl_cffi session."""
-    session = _ensure_session()
+    """Make an HTTP request with global rate limiting and 429 retry."""
+    global _last_request_time
 
-    if method.upper() == "GET":
-        resp = session.get(url)
-    else:
-        resp = session.post(url, json=body)
+    for attempt in range(MAX_429_RETRIES + 1):
+        _rate_limit_wait()
+
+        session = _ensure_session()
+        if method.upper() == "GET":
+            resp = session.get(url)
+        else:
+            resp = session.post(url, json=body)
+
+        if resp.status_code != 429:
+            return _FetchResponse(resp.status_code, resp.text)
+
+        # 429 Too Many Requests — back off and pause all threads
+        if attempt < MAX_429_RETRIES:
+            backoff = INITIAL_429_BACKOFF * (2 ** attempt)
+            logger.warning(
+                "HTTP 429 — backing off %.1fs (attempt %d/%d)",
+                backoff, attempt + 1, MAX_429_RETRIES,
+            )
+            # Push the global rate limiter forward to pause all threads
+            with _rate_lock:
+                future = time.monotonic() + backoff
+                if future > _last_request_time:
+                    _last_request_time = future
+            time.sleep(backoff)
+        else:
+            logger.error("HTTP 429 after %d retries, giving up", MAX_429_RETRIES)
 
     return _FetchResponse(resp.status_code, resp.text)
 
@@ -722,7 +769,6 @@ def fetch_all_offers_for_category(
     total_hits = None
 
     while True:
-        time.sleep(DELAY_BETWEEN_CALLS)
         result = _post_with_retry("offer-category", {
             "storeId": store_id,
             "category": {"kind": "productCategory", "slug": slug},
@@ -774,7 +820,6 @@ def fetch_all_offers_for_store(
     total_api_calls = 1
 
     categories_list = fetch_all_categories(store_id)
-    time.sleep(DELAY_BETWEEN_CALLS)
 
     results = []
     total_offers = 0
@@ -956,8 +1001,6 @@ def validate_api_headers() -> dict:
     except Exception as e:
         statuses["storesStatus"] = 0
         errors.append(f"stores/search failed: {e}")
-
-    time.sleep(DELAY_BETWEEN_CALLS)
 
     # 2. search-offers (primary endpoint)
     try:
