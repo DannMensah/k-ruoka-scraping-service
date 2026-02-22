@@ -16,7 +16,6 @@ import logging
 import math
 import os
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
@@ -33,12 +32,12 @@ MAX_OFFER_CATEGORY_LIMIT = 25  # API returns 400 for anything above 25
 SEARCH_OFFERS_PAGE_SIZE = 48   # search-offers returns up to 48 per page
 MAX_RETRIES = 2
 RETRY_BACKOFF = 1.5             # seconds, multiplied by attempt number
-PARALLEL_CATEGORIES = 4         # concurrent category fetches per store
 
 # Global rate limiting — enforces max request rate across ALL threads
-GLOBAL_MIN_INTERVAL = 0.3       # seconds between requests (~3.3 req/s)
-MAX_429_RETRIES = 3              # retry attempts on HTTP 429
-INITIAL_429_BACKOFF = 5.0        # first 429 backoff; doubles each retry
+# 0.5s = 2 req/s, proven safe from benchmarking (see AGENTS.md).
+GLOBAL_MIN_INTERVAL = 0.5       # seconds between requests (~2 req/s)
+MAX_429_RETRIES = 4              # retry attempts on HTTP 429
+INITIAL_429_BACKOFF = 15.0       # first 429 backoff; doubles each retry
 
 # Helsinki geo-filtering
 HELSINKI_LAT = 60.1699
@@ -853,12 +852,12 @@ def search_all_offers_for_store(
     category_path: str = "",
     on_page: callable = None,
 ) -> dict:
-    """Fetch ALL offers for a store via category-based parallel fetching.
+    """Fetch ALL offers for a store via category-based sequential fetching.
 
     Strategy:
       1. GET offer-categories → list of category slugs
       2. For each category, paginate offer-category (limit 25) to get all offers
-      3. Fetch categories in parallel (PARALLEL_CATEGORIES threads)
+      3. Fetch categories sequentially with global rate limiting (2 req/s)
       4. Deduplicate offers by offer ID (same offer can appear in multiple categories)
 
     This avoids the search-offers offset-1000 hard limit and is significantly
@@ -894,28 +893,24 @@ def search_all_offers_for_store(
             "elapsedSeconds": round(time.perf_counter() - t0, 3),
         }
 
-    # 2. Fetch all offers per category in parallel
+    # 2. Fetch all offers per category sequentially
+    #    Sequential avoids thundering-herd after 429 backoff and keeps
+    #    the request rate predictable at GLOBAL_MIN_INTERVAL.
     all_offers_by_id: dict[str, dict] = {}  # deduplicate by offer ID
 
-    def _fetch_category(slug: str) -> dict:
-        return fetch_all_offers_for_category(store_id, slug)
-
-    with ThreadPoolExecutor(max_workers=PARALLEL_CATEGORIES) as pool:
-        futures = {pool.submit(_fetch_category, s): s for s in slugs}
-        for future in as_completed(futures):
-            slug = futures[future]
-            try:
-                result = future.result()
-                api_calls += result["apiCalls"]
-                for offer in result["offers"]:
-                    oid = offer.get("id", "")
-                    if oid and oid not in all_offers_by_id:
-                        all_offers_by_id[oid] = offer
-            except Exception:
-                logger.warning(
-                    "Store %s: category '%s' failed, skipping",
-                    store_id, slug, exc_info=True,
-                )
+    for slug in slugs:
+        try:
+            result = fetch_all_offers_for_category(store_id, slug)
+            api_calls += result["apiCalls"]
+            for offer in result["offers"]:
+                oid = offer.get("id", "")
+                if oid and oid not in all_offers_by_id:
+                    all_offers_by_id[oid] = offer
+        except Exception:
+            logger.warning(
+                "Store %s: category '%s' failed, skipping",
+                store_id, slug, exc_info=True,
+            )
 
     offers = list(all_offers_by_id.values())
     elapsed = time.perf_counter() - t0
