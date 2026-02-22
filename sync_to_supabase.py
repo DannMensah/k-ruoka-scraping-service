@@ -392,6 +392,13 @@ def main() -> None:
     stores = fetch_helsinki_stores()
     logger.info("Found %d stores", len(stores))
 
+    if stores:
+        s0 = stores[0]
+        logger.info(
+            "Sample store: id=%s name=%s geo=%s",
+            s0.get("id"), s0.get("name"), s0.get("geo"),
+        )
+
     if not stores:
         logger.warning("No stores found — exiting")
         sys.exit(0)
