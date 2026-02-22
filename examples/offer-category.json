@@ -1,0 +1,1706 @@
+{
+  "name": {
+    "english": "Fruit and vegetables",
+    "finnish": "Hedelm\u00e4t ja vihannekset",
+    "swedish": "Frukt och gr\u00f6nt"
+  },
+  "offers": [
+    {
+      "campaignId": "11596034",
+      "id": "S4177155P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11596034/c447f498-34ab-4432-9351-433782fbdd61",
+      "localizedTitle": {
+        "english": "Suvi carrot puree 1kg Finland",
+        "finnish": "Suvi porkkanasose 1kg Suomi",
+        "swedish": "Suvi morotpur\u00e9 1kg Finland"
+      },
+      "normalPricing": {
+        "price": 5.76,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 2.99,
+        "unit": {
+          "fi": "ps",
+          "sv": "ps"
+        }
+      },
+      "product": {
+        "id": "6418248002382",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "6418248002382",
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 25,
+            "path": "hedelmat-ja-vihannekset/juurekset/jalostetut-juurekset",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Potatoes and root vegetables",
+                  "finnish": "Juurekset",
+                  "swedish": "Potatis och rotfrukter"
+                },
+                "slug": "hedelmat-ja-vihannekset/juurekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Prepared root vegetables",
+                  "finnish": "Jalostetut juurekset",
+                  "swedish": "F\u00e4rdigskurna rotfrukter"
+                },
+                "slug": "hedelmat-ja-vihannekset/juurekset/jalostetut-juurekset"
+              }
+            ]
+          },
+          "ean": "6418248002382",
+          "id": "6418248002382",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/6418248002382",
+            "https://public.keskofiles.com/f/k-ruoka/product/0NNS0/6418248002382"
+          ],
+          "ingredientId": "1648300_328",
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "finnish": "Suvi porkkanasose 1kg Suomi",
+            "swedish": "Suvi morotpure 1kg Finland"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "11574370",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 48,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 2.99,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "startDate": "2026-01-28T05:30:49.000Z",
+                "storeCampaignId": "11596034",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 2.99
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 5.76,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 5.76
+                }
+              }
+            },
+            "vat": 13.5
+          },
+          "popularity": 7.199999809265137,
+          "productAttributes": {
+            "description": {},
+            "ean": "6418248002382",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/6418248002382"
+            },
+            "ingredientId": "1648300_328",
+            "labelName": {
+              "fi": "Suvi porkkanasose 1kg Suomi",
+              "sv": "Suvi morotpure 1kg Finland"
+            },
+            "marketingName": {
+              "fi": "Suvi porkkanasose 1kg Suomi",
+              "sv": "Suvi morotpure 1kg Finland"
+            },
+            "measurements": {
+              "contentSize": 1,
+              "contentUnit": "kg",
+              "grossWeight": 1.01,
+              "height": 4,
+              "length": 13,
+              "netWeight": 1,
+              "width": 32
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": false,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "fi",
+              "countryOfOriginI18n": {
+                "en": "Finland",
+                "fi": "Suomi",
+                "sv": "Finland"
+              },
+              "domestic": true
+            },
+            "pimId": "21870073",
+            "section": "1648",
+            "urlSlug": "suvi-porkkanasose-1kg-suomi-6418248002382"
+          },
+          "section": "1648",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Suvi porkkanasose 1kg Suomi"
+    },
+    {
+      "campaignId": "200083711",
+      "id": "301853P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/200083711_P305711/3894784b-de0f-4555-b2df-e727d0fed7ab",
+      "localizedTitle": {
+        "english": "Banana",
+        "finnish": "Banaani, Kolumbia / Costa Rica / Ecuador",
+        "swedish": "Banan"
+      },
+      "normalPricing": {
+        "price": 1.68,
+        "unit": {
+          "fi": "kg",
+          "sv": "kg"
+        }
+      },
+      "offerNameId": "200083711_00001",
+      "offerType": "chain",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 0.99,
+        "unit": {
+          "fi": "kg",
+          "sv": "kg"
+        }
+      },
+      "product": {
+        "id": "2000504400007",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "2000504400007",
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 1,
+            "path": "hedelmat-ja-vihannekset/hedelmat/banaanit",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Fruit",
+                  "finnish": "Hedelm\u00e4t",
+                  "swedish": "Frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat"
+              },
+              {
+                "localizedName": {
+                  "english": "Bananas",
+                  "finnish": "Banaanit",
+                  "swedish": "Bananer"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat/banaanit"
+              }
+            ]
+          },
+          "ean": "2000504400007",
+          "id": "2000504400007",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/2000504400007"
+          ],
+          "ingredientId": "150028934_220",
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Banana",
+            "finnish": "Banaani",
+            "swedish": "Banan"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "200083711",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 41,
+                "discountSource": "SAP",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": true,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 0.17,
+                "soldBy": {
+                  "averageWeight": 0.175,
+                  "kind": "approximatePiece"
+                },
+                "startDate": "2026-02-11T22:00:00.000Z",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 0.99
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": true,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 0.29,
+                "soldBy": {
+                  "averageWeight": 0.175,
+                  "kind": "approximatePiece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 1.68
+                }
+              }
+            },
+            "scaleNumber": "15",
+            "vat": 13.5
+          },
+          "popularity": 54133.80078125,
+          "productAttributes": {
+            "description": {},
+            "ean": "2000504400007",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/2000504400007"
+            },
+            "ingredientId": "150028934_220",
+            "labelName": {
+              "fi": "Fyffes/Dole Banaani",
+              "sv": "Banan kg"
+            },
+            "marketingName": {
+              "en": "Banana",
+              "fi": "Banaani",
+              "sv": "Banan"
+            },
+            "measurements": {
+              "averageWeight": 0.175,
+              "contentSize": 1,
+              "contentUnit": "kg",
+              "grossWeight": 1,
+              "height": 10,
+              "length": 10,
+              "netWeight": 1,
+              "width": 10
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": true,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "ec",
+              "countryOfOriginI18n": {
+                "fi": "Ecuador",
+                "sv": "Ecuador"
+              }
+            },
+            "pimId": "5044",
+            "section": "1500",
+            "urlSlug": "banaani-kg-2000504400007"
+          },
+          "section": "1500",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Banaani, Kolumbia / Costa Rica / Ecuador"
+    },
+    {
+      "campaignId": "200083711",
+      "id": "301851P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/200083711_01/769f7b4f-f723-4460-a033-ff5c0792907c",
+      "localizedTitle": {
+        "english": "Myrtinen's mini traditional salt and spice cucumbers 240g 6.00/2\u00a0pc Individually",
+        "finnish": "Myrttisen mini perinteiset suola- ja maustekurkut 240\u00a0g",
+        "swedish": "Myrtinens mini traditionella salt- och kryddgurkor 240g 6,00/2\u00a0st Individuellt"
+      },
+      "normalPricing": {
+        "price": 4.99,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerNameId": "200083711_00003",
+      "offerType": "chain",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 6,
+        "unit": {
+          "fi": "2 kpl",
+          "sv": "2 kpl"
+        }
+      },
+      "title": "Myrttisen mini perinteiset suola- ja maustekurkut 240\u00a0g"
+    },
+    {
+      "campaignId": "11750613",
+      "id": "S4324868P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11750613/c98bfbcc-043c-403b-ba7d-3c4f931b5f72",
+      "localizedTitle": {
+        "english": "Pirkka Finnish Brussels sprouts 300g",
+        "finnish": "Pirkka suomalainen ruusukaali 300g",
+        "swedish": "Pirkka Finska brysselk\u00e5l 300g"
+      },
+      "normalPricing": {
+        "price": 3.18,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 1.99,
+        "unit": {
+          "fi": "rs",
+          "sv": "rs"
+        }
+      },
+      "product": {
+        "id": "6410405085436",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "6410405085436",
+          "brand": {
+            "id": "1",
+            "name": "Pirkka",
+            "slug": "pirkka-1"
+          },
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 9,
+            "path": "hedelmat-ja-vihannekset/vihannekset/kaalit",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Vegetables",
+                  "finnish": "Vihannekset",
+                  "swedish": "Gr\u00f6nsaker"
+                },
+                "slug": "hedelmat-ja-vihannekset/vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Cabbage",
+                  "finnish": "Kaalit",
+                  "swedish": "K\u00e5l"
+                },
+                "slug": "hedelmat-ja-vihannekset/vihannekset/kaalit"
+              }
+            ]
+          },
+          "ean": "6410405085436",
+          "id": "6410405085436",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/6410405085436"
+          ],
+          "ingredientId": "1639327_319",
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Pirkka Brussels sprout 300g Finland",
+            "finnish": "Pirkka suomalainen ruusukaali 300g",
+            "swedish": "Pirkka Brysselk\u00e5l 300g Finland"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "11728724",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 37,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 1.99,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "startDate": "2026-02-13T22:00:00.000Z",
+                "storeCampaignId": "11750613",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.3,
+                  "unit": "kg",
+                  "value": 6.63
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 3.18,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.3,
+                  "unit": "kg",
+                  "value": 10.6
+                }
+              }
+            },
+            "vat": 13.5
+          },
+          "popularity": 336.8999938964844,
+          "productAttributes": {
+            "description": {},
+            "ean": "6410405085436",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/6410405085436"
+            },
+            "ingredientId": "1639327_319",
+            "labelName": {
+              "fi": "Pirkka Ruusukaali 300g Suomi 1lk",
+              "sv": "Pirkka Brysselk\u00e5l 300g Finland 1kl"
+            },
+            "marketingName": {
+              "en": "Pirkka Brussels sprout 300g Finland",
+              "fi": "Pirkka suomalainen ruusukaali 300g",
+              "sv": "Pirkka Brysselk\u00e5l 300g Finland"
+            },
+            "measurements": {
+              "contentSize": 0.3,
+              "contentUnit": "kg",
+              "grossWeight": 0.33,
+              "height": 15,
+              "length": 10,
+              "netWeight": 0.3,
+              "width": 10
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": false,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "fi",
+              "countryOfOriginI18n": {
+                "en": "Finland",
+                "fi": "Suomi",
+                "sv": "Finland"
+              },
+              "domestic": true
+            },
+            "pimId": "21154921",
+            "section": "1639",
+            "urlSlug": "pirkka-ruusukaali-300g-suomi-1lk-6410405085436"
+          },
+          "section": "1639",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Pirkka suomalainen ruusukaali 300g"
+    },
+    {
+      "campaignId": "11480245",
+      "id": "S4067671P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11480245/b05d63ef-4a0b-47e5-b124-75b93091f88d",
+      "localizedTitle": {
+        "english": "Chocolate-cocoa date 120g",
+        "finnish": "Suklaa-kaakao taateli 120g",
+        "swedish": "Choklad-kakao datum 120g"
+      },
+      "normalPricing": {
+        "price": 2.18,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 1.49,
+        "unit": {
+          "fi": "ps",
+          "sv": "ps"
+        }
+      },
+      "product": {
+        "id": "5708147010139",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "5708147010139",
+          "brand": {
+            "id": "15323",
+            "name": "GREEN DATES",
+            "slug": "green-dates-15323"
+          },
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 7,
+            "path": "hedelmat-ja-vihannekset/hedelmat/muut-hedelmat",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Fruit",
+                  "finnish": "Hedelm\u00e4t",
+                  "swedish": "Frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat"
+              },
+              {
+                "localizedName": {
+                  "english": "Other fruit",
+                  "finnish": "Muut hedelm\u00e4t",
+                  "swedish": "\u00d6vrig frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat/muut-hedelmat"
+              }
+            ]
+          },
+          "ean": "5708147010139",
+          "id": "5708147010139",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/5708147010139"
+          ],
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Chocolate-cocoa date 120g",
+            "finnish": "Suklaa-kaakao taateli 120g",
+            "swedish": "Choklad-kakao dadel 120\u00a0g"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "11458886",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 31,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 1.49,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "startDate": "2026-01-14T09:32:16.000Z",
+                "storeCampaignId": "11480245",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.12,
+                  "unit": "kg",
+                  "value": 12.42
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 2.18,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.12,
+                  "unit": "kg",
+                  "value": 18.17
+                }
+              }
+            },
+            "vat": 13.5
+          },
+          "popularity": 93.30000305175781,
+          "productAttributes": {
+            "description": {},
+            "ean": "5708147010139",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/5708147010139"
+            },
+            "labelName": {
+              "fi": "Suklaa-kaakao taateli 120g",
+              "sv": "Choklad-kakao dadel 120\u00a0g"
+            },
+            "marketingName": {
+              "en": "Chocolate-cocoa date 120g",
+              "fi": "Suklaa-kaakao taateli 120g",
+              "sv": "Choklad-kakao dadel 120\u00a0g"
+            },
+            "measurements": {
+              "contentSize": 0.12,
+              "contentUnit": "kg",
+              "grossWeight": 0.12,
+              "height": 18,
+              "length": 5,
+              "netWeight": 0.12,
+              "width": 12
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": false,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "ir",
+              "countryOfOriginI18n": {
+                "en": "Iran",
+                "fi": "Iran",
+                "sv": "Iran"
+              },
+              "domestic": false
+            },
+            "pimId": "22081893",
+            "section": "1598",
+            "urlSlug": "suklaa-kaakao-taateli-120g-5708147010139"
+          },
+          "section": "1598",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Suklaa-kaakao taateli 120g"
+    },
+    {
+      "campaignId": "11663298",
+      "id": "S4241395P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11663298/84d718ce-f750-4545-9a2d-d84116d42aac",
+      "localizedTitle": {
+        "english": "Chocolate Peanut Date 120g",
+        "finnish": "Suklaa-maap\u00e4hkin\u00e4 taateli 120g",
+        "swedish": "Choklad Jordn\u00f6tsdatum 120g"
+      },
+      "normalPricing": {
+        "price": 2.18,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 1.49,
+        "unit": {
+          "fi": "ps",
+          "sv": "ps"
+        }
+      },
+      "product": {
+        "id": "5708147010146",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "5708147010146",
+          "brand": {
+            "id": "15323",
+            "name": "GREEN DATES",
+            "slug": "green-dates-15323"
+          },
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 7,
+            "path": "hedelmat-ja-vihannekset/hedelmat/muut-hedelmat",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Fruit",
+                  "finnish": "Hedelm\u00e4t",
+                  "swedish": "Frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat"
+              },
+              {
+                "localizedName": {
+                  "english": "Other fruit",
+                  "finnish": "Muut hedelm\u00e4t",
+                  "swedish": "\u00d6vrig frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat/muut-hedelmat"
+              }
+            ]
+          },
+          "ean": "5708147010146",
+          "id": "5708147010146",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/5708147010146"
+          ],
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Chocolate-peanuts date 120g",
+            "finnish": "Suklaa-maap\u00e4hkin\u00e4 taateli 120g",
+            "swedish": "Choklad-jordn\u00f6ts dadel 120g"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "11641353",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 31,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 1.49,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "startDate": "2026-02-04T11:22:51.000Z",
+                "storeCampaignId": "11663298",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.12,
+                  "unit": "kg",
+                  "value": 12.42
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 2.18,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.12,
+                  "unit": "kg",
+                  "value": 18.17
+                }
+              }
+            },
+            "vat": 13.5
+          },
+          "popularity": 90.4000015258789,
+          "productAttributes": {
+            "description": {},
+            "ean": "5708147010146",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/5708147010146"
+            },
+            "labelName": {
+              "fi": "Suklaa-maap\u00e4hkin\u00e4 taateli 120g",
+              "sv": "Choklad-jordn\u00f6ts dadel 120g"
+            },
+            "marketingName": {
+              "en": "Chocolate-peanuts date 120g",
+              "fi": "Suklaa-maap\u00e4hkin\u00e4 taateli 120g",
+              "sv": "Choklad-jordn\u00f6ts dadel 120g"
+            },
+            "measurements": {
+              "contentSize": 0.12,
+              "contentUnit": "kg",
+              "grossWeight": 0.122,
+              "height": 18,
+              "length": 5,
+              "netWeight": 0.12,
+              "width": 12
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": false,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "ir",
+              "countryOfOriginI18n": {
+                "en": "Iran",
+                "fi": "Iran",
+                "sv": "Iran"
+              },
+              "domestic": false
+            },
+            "pimId": "22081896",
+            "section": "1598",
+            "urlSlug": "suklaa-maapahkina-taateli-120g-5708147010146"
+          },
+          "section": "1598",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Suklaa-maap\u00e4hkin\u00e4 taateli 120g"
+    },
+    {
+      "campaignId": "11729797",
+      "id": "S4305452P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11729797/cee2b82e-b15d-45e4-a630-f9d6c4f44fae",
+      "localizedTitle": {
+        "english": "Collected cabbage",
+        "finnish": "Ker\u00e4kaali",
+        "swedish": "Samlad k\u00e5l"
+      },
+      "normalPricing": {
+        "price": 1.24,
+        "unit": {
+          "fi": "kg",
+          "sv": "kg"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 0.99,
+        "unit": {
+          "fi": "kg",
+          "sv": "kg"
+        }
+      },
+      "product": {
+        "id": "2000602400008",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "2000602400008",
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 9,
+            "path": "hedelmat-ja-vihannekset/vihannekset/kaalit",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Vegetables",
+                  "finnish": "Vihannekset",
+                  "swedish": "Gr\u00f6nsaker"
+                },
+                "slug": "hedelmat-ja-vihannekset/vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Cabbage",
+                  "finnish": "Kaalit",
+                  "swedish": "K\u00e5l"
+                },
+                "slug": "hedelmat-ja-vihannekset/vihannekset/kaalit"
+              }
+            ]
+          },
+          "ean": "2000602400008",
+          "id": "2000602400008",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/2000602400008"
+          ],
+          "ingredientId": "1635320_308",
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Cabbage Finland",
+            "finnish": "Ker\u00e4kaali",
+            "swedish": "Huvudk\u00e5l Finland"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "11707937",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 20,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": true,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 1.39,
+                "soldBy": {
+                  "averageWeight": 1.4,
+                  "kind": "approximatePiece"
+                },
+                "startDate": "2026-02-12T04:11:34.000Z",
+                "storeCampaignId": "11729797",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 0.99
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": true,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 1.74,
+                "soldBy": {
+                  "averageWeight": 1.4,
+                  "kind": "approximatePiece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 1.24
+                }
+              }
+            },
+            "scaleNumber": "42",
+            "vat": 13.5
+          },
+          "popularity": 3700.39990234375,
+          "productAttributes": {
+            "description": {},
+            "ean": "2000602400008",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/2000602400008"
+            },
+            "ingredientId": "1635320_308",
+            "labelName": {
+              "fi": "Ker\u00e4kaali Suomi",
+              "sv": "Huvudk\u00e5l Finland kg"
+            },
+            "marketingName": {
+              "en": "Cabbage Finland",
+              "fi": "Ker\u00e4kaali",
+              "sv": "Huvudk\u00e5l Finland"
+            },
+            "measurements": {
+              "averageWeight": 1.4,
+              "contentSize": 1,
+              "contentUnit": "kg",
+              "grossWeight": 1,
+              "height": 10,
+              "length": 10,
+              "netWeight": 1,
+              "width": 10
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": true,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "fi",
+              "countryOfOriginI18n": {
+                "fi": "Suomi",
+                "sv": "Finland"
+              },
+              "domestic": false
+            },
+            "pimId": "6024",
+            "section": "1635",
+            "urlSlug": "kerakaali-suomi-kg-2000602400008"
+          },
+          "section": "1635",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Ker\u00e4kaali"
+    },
+    {
+      "campaignId": "11750870",
+      "id": "S4325434P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11750870/568775b9-7cf6-4752-bbc7-82691de7434c",
+      "localizedTitle": {
+        "english": "Pirkka thickens 2pc/250g",
+        "finnish": "Pirkka paksoi 2kpl/250g",
+        "swedish": "Pirkka tjocknar 2st/250g"
+      },
+      "normalPricing": {
+        "price": 2.49,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 2.19,
+        "unit": {
+          "fi": "ps",
+          "sv": "ps"
+        }
+      },
+      "product": {
+        "id": "6410405330475",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "6410405330475",
+          "brand": {
+            "id": "1",
+            "name": "Pirkka",
+            "slug": "pirkka-1"
+          },
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 9,
+            "path": "hedelmat-ja-vihannekset/vihannekset/kaalit",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Vegetables",
+                  "finnish": "Vihannekset",
+                  "swedish": "Gr\u00f6nsaker"
+                },
+                "slug": "hedelmat-ja-vihannekset/vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Cabbage",
+                  "finnish": "Kaalit",
+                  "swedish": "K\u00e5l"
+                },
+                "slug": "hedelmat-ja-vihannekset/vihannekset/kaalit"
+              }
+            ]
+          },
+          "ean": "6410405330475",
+          "id": "6410405330475",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/6410405330475"
+          ],
+          "ingredientId": "1639359_321",
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Pirkka pak choi 2pcs/250g",
+            "finnish": "Pirkka paksoi 2kpl/250g",
+            "swedish": "Pirkka pak choi 2st/250g"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "discount": {
+                "campaignId": "11728982",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 12,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 2.19,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "startDate": "2026-02-13T11:53:24.000Z",
+                "storeCampaignId": "11750870",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.25,
+                  "unit": "kg",
+                  "value": 8.76
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 2.49,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.25,
+                  "unit": "kg",
+                  "value": 9.96
+                }
+              }
+            },
+            "vat": 13.5
+          },
+          "popularity": 429.8999938964844,
+          "productAttributes": {
+            "description": {},
+            "ean": "6410405330475",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/6410405330475"
+            },
+            "ingredientId": "1639359_321",
+            "labelName": {
+              "fi": "Pirkka paksoi 2kpl/250g",
+              "sv": "Pirkka pak choi 2st/250g"
+            },
+            "marketingName": {
+              "en": "Pirkka pak choi 2pcs/250g",
+              "fi": "Pirkka paksoi 2kpl/250g",
+              "sv": "Pirkka pak choi 2st/250g"
+            },
+            "measurements": {
+              "contentSize": 0.25,
+              "contentUnit": "kg",
+              "grossWeight": 0.25,
+              "height": 30,
+              "length": 8,
+              "netWeight": 0.25,
+              "width": 17
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": false,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "es",
+              "countryOfOriginI18n": {
+                "en": "Spain",
+                "fi": "Espanja",
+                "sv": "Spanien"
+              },
+              "domestic": false
+            },
+            "pimId": "22030351",
+            "section": "1639",
+            "urlSlug": "pirkka-paksoi-2kpl250g-6410405330475"
+          },
+          "section": "1639",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Pirkka paksoi 2kpl/250g"
+    },
+    {
+      "campaignId": "11720310",
+      "id": "S4296150P",
+      "image": "https://public.keskofiles.com/f/k-ruoka-offers/11720310/a0cdc4de-fb8c-430c-94dc-ebd3dffc9ad6",
+      "localizedTitle": {
+        "english": "Pirkka kiwi 500g 1st class",
+        "finnish": "Pirkka kiivi 500g 1lk",
+        "swedish": "Pirkka kiwi 500g 1:a klass"
+      },
+      "normalPricing": {
+        "price": 1.69,
+        "unit": {
+          "fi": "kpl",
+          "sv": "st"
+        }
+      },
+      "offerType": "store",
+      "pricing": {
+        "discountAvailability": {
+          "store": true,
+          "web": true
+        },
+        "discountType": "STANDARD",
+        "price": 3,
+        "unit": {
+          "fi": "2 rs",
+          "sv": "2 rs"
+        }
+      },
+      "product": {
+        "id": "6410405078872",
+        "product": {
+          "adInfo": {
+            "highlightAd": false,
+            "isSponsored": false
+          },
+          "availability": {
+            "store": true,
+            "web": true
+          },
+          "baseEan": "6410405078872",
+          "brand": {
+            "id": "1",
+            "name": "Pirkka",
+            "slug": "pirkka-1"
+          },
+          "category": {
+            "localizedName": {
+              "english": "Fruit and vegetables",
+              "finnish": "Hedelm\u00e4t ja vihannekset",
+              "swedish": "Frukt och gr\u00f6nt"
+            },
+            "order": 7,
+            "path": "hedelmat-ja-vihannekset/hedelmat/muut-hedelmat",
+            "tree": [
+              {
+                "localizedName": {
+                  "english": "Fruit and vegetables",
+                  "finnish": "Hedelm\u00e4t ja vihannekset",
+                  "swedish": "Frukt och gr\u00f6nt"
+                },
+                "slug": "hedelmat-ja-vihannekset"
+              },
+              {
+                "localizedName": {
+                  "english": "Fruit",
+                  "finnish": "Hedelm\u00e4t",
+                  "swedish": "Frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat"
+              },
+              {
+                "localizedName": {
+                  "english": "Other fruit",
+                  "finnish": "Muut hedelm\u00e4t",
+                  "swedish": "\u00d6vrig frukt"
+                },
+                "slug": "hedelmat-ja-vihannekset/hedelmat/muut-hedelmat"
+              }
+            ]
+          },
+          "ean": "6410405078872",
+          "id": "6410405078872",
+          "images": [
+            "https://public.keskofiles.com/f/k-ruoka/product/6410405078872"
+          ],
+          "ingredientId": "156528939_246",
+          "isAvailable": true,
+          "isReferenceEan": false,
+          "kind": "v3",
+          "localizedName": {
+            "english": "Pirkka kiwi 500g 1cl",
+            "finnish": "Pirkka kiivi 500g 1lk",
+            "swedish": "Pirkka kiwi 500g 1kl"
+          },
+          "mobilescan": {
+            "discountLimited": false,
+            "pricing": {
+              "batch": {
+                "amount": 2,
+                "campaignId": "11698433",
+                "discountAvailability": {
+                  "store": true,
+                  "web": true
+                },
+                "discountPercentage": 11,
+                "discountSource": "POS",
+                "discountType": "STANDARD",
+                "endDate": "2026-02-15T21:59:59.000Z",
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 3,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "startDate": "2026-02-11T06:41:56.000Z",
+                "storeCampaignId": "11720310",
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 1,
+                  "unit": "kg",
+                  "value": 3
+                },
+                "validNumberOfDaysLeft": 2
+              },
+              "libraryVersion": "2.31.0",
+              "normal": {
+                "isApproximate": false,
+                "localizedUnit": {
+                  "fi": "kpl",
+                  "sv": "st"
+                },
+                "price": 1.69,
+                "soldBy": {
+                  "kind": "piece"
+                },
+                "unit": "kpl",
+                "unitPrice": {
+                  "contentSize": 0.5,
+                  "unit": "kg",
+                  "value": 3.38
+                }
+              }
+            },
+            "vat": 13.5
+          },
+          "popularity": 8229.400390625,
+          "productAttributes": {
+            "description": {},
+            "ean": "6410405078872",
+            "image": {
+              "url": "https://public.keskofiles.com/f/k-ruoka/product/6410405078872"
+            },
+            "ingredientId": "156528939_246",
+            "labelName": {
+              "fi": "Pirkka kiivi 500g",
+              "sv": "Pirkka kiwi 500g"
+            },
+            "marketingName": {
+              "en": "Pirkka kiwi 500g 1cl",
+              "fi": "Pirkka kiivi 500g 1lk",
+              "sv": "Pirkka kiwi 500g 1kl"
+            },
+            "measurements": {
+              "contentSize": 0.5,
+              "contentUnit": "kg",
+              "grossWeight": 0.56,
+              "height": 8,
+              "length": 10,
+              "netWeight": 0.5,
+              "width": 15
+            },
+            "meta": {
+              "alcoholStatus": "allowed",
+              "canBeShownInWeb": true,
+              "deprecatedEan": false,
+              "hiddenInRecipe": false,
+              "isAlcohol": false,
+              "isInternalCode": false,
+              "isUtility": false,
+              "source": "tps"
+            },
+            "origin": {
+              "countryOfOrigin": "gr",
+              "countryOfOriginI18n": {
+                "en": "Greece",
+                "fi": "Kreikka",
+                "sv": "Grekland"
+              },
+              "domestic": false
+            },
+            "pimId": "20697152",
+            "section": "1565",
+            "urlSlug": "pirkka-kiivi-500g-6410405078872"
+          },
+          "section": "1565",
+          "store": {
+            "id": "N110",
+            "isLocal": false
+          },
+          "type": "product"
+        },
+        "score": 0,
+        "type": "product"
+      },
+      "title": "Pirkka kiivi 500g 1lk"
+    }
+  ],
+  "paginatedOfferIds": [
+    "S4296149P",
+    "S4224469P",
+    "300982P",
+    "S4304990P"
+  ],
+  "totalHits": 13
+}

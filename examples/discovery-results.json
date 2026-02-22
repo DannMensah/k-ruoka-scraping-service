@@ -1,0 +1,1150 @@
+{
+  "summary": {
+    "totalStores": 1060,
+    "storesSampled": 3,
+    "totalCategories": 80,
+    "totalOffers": 3312,
+    "apiCallsMade": 84,
+    "totalTimeSeconds": 30.15
+  },
+  "categoryDetails": [
+    {
+      "storeId": "N195",
+      "category": "hedelmat-ja-vihannekset",
+      "countFromListing": 20,
+      "totalHits": 20,
+      "offersInFirstPage": 20,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "leivat-keksit-ja-leivonnaiset",
+      "countFromListing": 71,
+      "totalHits": 71,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 46,
+      "extraPagesNeeded": 2,
+      "totalApiCallsForCategory": 3
+    },
+    {
+      "storeId": "N195",
+      "category": "liha-ja-kasviproteiinit",
+      "countFromListing": 83,
+      "totalHits": 83,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 58,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N195",
+      "category": "kala-ja-merenelavat",
+      "countFromListing": 15,
+      "totalHits": 15,
+      "offersInFirstPage": 15,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "valmisruoka",
+      "countFromListing": 56,
+      "totalHits": 56,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 31,
+      "extraPagesNeeded": 2,
+      "totalApiCallsForCategory": 3
+    },
+    {
+      "storeId": "N195",
+      "category": "maito-juusto-munat-ja-rasvat",
+      "countFromListing": 79,
+      "totalHits": 79,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 54,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N195",
+      "category": "kuivat-elintarvikkeet-ja-leivonta",
+      "countFromListing": 43,
+      "totalHits": 43,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 18,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N195",
+      "category": "sailykkeet-keitot-ja-ateria-ainekset",
+      "countFromListing": 26,
+      "totalHits": 26,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 1,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N195",
+      "category": "mausteet-ja-maustaminen",
+      "countFromListing": 12,
+      "totalHits": 12,
+      "offersInFirstPage": 12,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "texmex-ja-maailman-maut",
+      "countFromListing": 16,
+      "totalHits": 16,
+      "offersInFirstPage": 16,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "pakasteet",
+      "countFromListing": 42,
+      "totalHits": 42,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 17,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N195",
+      "category": "makeiset-ja-naposteltavat",
+      "countFromListing": 51,
+      "totalHits": 51,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 26,
+      "extraPagesNeeded": 2,
+      "totalApiCallsForCategory": 3
+    },
+    {
+      "storeId": "N195",
+      "category": "juomat",
+      "countFromListing": 110,
+      "totalHits": 110,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 85,
+      "extraPagesNeeded": 4,
+      "totalApiCallsForCategory": 5
+    },
+    {
+      "storeId": "N195",
+      "category": "lapset",
+      "countFromListing": 26,
+      "totalHits": 26,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 1,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N195",
+      "category": "lemmikit",
+      "countFromListing": 22,
+      "totalHits": 22,
+      "offersInFirstPage": 22,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kosmetiikka-terveys-ja-hygienia",
+      "countFromListing": 86,
+      "totalHits": 86,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 61,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N195",
+      "category": "keittio-astiat-ja-kattaus",
+      "countFromListing": 17,
+      "totalHits": 17,
+      "offersInFirstPage": 17,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kodinhoito-ja-taloustarvikkeet",
+      "countFromListing": 19,
+      "totalHits": 19,
+      "offersInFirstPage": 19,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kodintekstiilit-ja-sisustus",
+      "countFromListing": 24,
+      "totalHits": 24,
+      "offersInFirstPage": 24,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kodinkoneet-ja-elektroniikka",
+      "countFromListing": 34,
+      "totalHits": 34,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 9,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N195",
+      "category": "sahko-pienrauta-ja-autotarvikkeet",
+      "countFromListing": 3,
+      "totalHits": 3,
+      "offersInFirstPage": 3,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kukat-ja-puutarha",
+      "countFromListing": 7,
+      "totalHits": 7,
+      "offersInFirstPage": 7,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "vapaa-aika-ja-urheilu",
+      "countFromListing": 11,
+      "totalHits": 11,
+      "offersInFirstPage": 11,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kirjat-lehdet-ja-paperitarvikkeet",
+      "countFromListing": 9,
+      "totalHits": 9,
+      "offersInFirstPage": 9,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "kengat-ja-kenkienhoito",
+      "countFromListing": 11,
+      "totalHits": 11,
+      "offersInFirstPage": 11,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N195",
+      "category": "vaatteet-ja-asusteet",
+      "countFromListing": 35,
+      "totalHits": 35,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 10,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "hedelmat-ja-vihannekset",
+      "countFromListing": 18,
+      "totalHits": 18,
+      "offersInFirstPage": 18,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "leivat-keksit-ja-leivonnaiset",
+      "countFromListing": 149,
+      "totalHits": 149,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 124,
+      "extraPagesNeeded": 5,
+      "totalApiCallsForCategory": 6
+    },
+    {
+      "storeId": "N190",
+      "category": "liha-ja-kasviproteiinit",
+      "countFromListing": 102,
+      "totalHits": 102,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 77,
+      "extraPagesNeeded": 4,
+      "totalApiCallsForCategory": 5
+    },
+    {
+      "storeId": "N190",
+      "category": "kala-ja-merenelavat",
+      "countFromListing": 31,
+      "totalHits": 31,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 6,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "valmisruoka",
+      "countFromListing": 50,
+      "totalHits": 50,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 25,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "maito-juusto-munat-ja-rasvat",
+      "countFromListing": 104,
+      "totalHits": 104,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 79,
+      "extraPagesNeeded": 4,
+      "totalApiCallsForCategory": 5
+    },
+    {
+      "storeId": "N190",
+      "category": "kuivat-elintarvikkeet-ja-leivonta",
+      "countFromListing": 69,
+      "totalHits": 69,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 44,
+      "extraPagesNeeded": 2,
+      "totalApiCallsForCategory": 3
+    },
+    {
+      "storeId": "N190",
+      "category": "sailykkeet-keitot-ja-ateria-ainekset",
+      "countFromListing": 42,
+      "totalHits": 42,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 17,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "oljyt-etikat-ja-salaattikastikkeet",
+      "countFromListing": 7,
+      "totalHits": 7,
+      "offersInFirstPage": 7,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "mausteet-ja-maustaminen",
+      "countFromListing": 23,
+      "totalHits": 23,
+      "offersInFirstPage": 23,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "texmex-ja-maailman-maut",
+      "countFromListing": 27,
+      "totalHits": 27,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 2,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "pakasteet",
+      "countFromListing": 92,
+      "totalHits": 92,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 67,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N190",
+      "category": "makeiset-ja-naposteltavat",
+      "countFromListing": 113,
+      "totalHits": 113,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 88,
+      "extraPagesNeeded": 4,
+      "totalApiCallsForCategory": 5
+    },
+    {
+      "storeId": "N190",
+      "category": "juomat",
+      "countFromListing": 135,
+      "totalHits": 135,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 110,
+      "extraPagesNeeded": 5,
+      "totalApiCallsForCategory": 6
+    },
+    {
+      "storeId": "N190",
+      "category": "lapset",
+      "countFromListing": 35,
+      "totalHits": 35,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 10,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "lemmikit",
+      "countFromListing": 36,
+      "totalHits": 36,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 11,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "kosmetiikka-terveys-ja-hygienia",
+      "countFromListing": 99,
+      "totalHits": 99,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 74,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N190",
+      "category": "keittio-astiat-ja-kattaus",
+      "countFromListing": 17,
+      "totalHits": 17,
+      "offersInFirstPage": 17,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "kodinhoito-ja-taloustarvikkeet",
+      "countFromListing": 17,
+      "totalHits": 17,
+      "offersInFirstPage": 17,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "kodintekstiilit-ja-sisustus",
+      "countFromListing": 25,
+      "totalHits": 25,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "kodinkoneet-ja-elektroniikka",
+      "countFromListing": 36,
+      "totalHits": 36,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 11,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N190",
+      "category": "sahko-pienrauta-ja-autotarvikkeet",
+      "countFromListing": 3,
+      "totalHits": 3,
+      "offersInFirstPage": 3,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "kukat-ja-puutarha",
+      "countFromListing": 10,
+      "totalHits": 10,
+      "offersInFirstPage": 10,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "vapaa-aika-ja-urheilu",
+      "countFromListing": 10,
+      "totalHits": 10,
+      "offersInFirstPage": 10,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "kirjat-lehdet-ja-paperitarvikkeet",
+      "countFromListing": 9,
+      "totalHits": 9,
+      "offersInFirstPage": 9,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "kengat-ja-kenkienhoito",
+      "countFromListing": 10,
+      "totalHits": 10,
+      "offersInFirstPage": 10,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N190",
+      "category": "vaatteet-ja-asusteet",
+      "countFromListing": 37,
+      "totalHits": 37,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 12,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "hedelmat-ja-vihannekset",
+      "countFromListing": 19,
+      "totalHits": 19,
+      "offersInFirstPage": 19,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "leivat-keksit-ja-leivonnaiset",
+      "countFromListing": 90,
+      "totalHits": 90,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 65,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N100",
+      "category": "liha-ja-kasviproteiinit",
+      "countFromListing": 54,
+      "totalHits": 54,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 29,
+      "extraPagesNeeded": 2,
+      "totalApiCallsForCategory": 3
+    },
+    {
+      "storeId": "N100",
+      "category": "kala-ja-merenelavat",
+      "countFromListing": 10,
+      "totalHits": 10,
+      "offersInFirstPage": 10,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "valmisruoka",
+      "countFromListing": 42,
+      "totalHits": 42,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 17,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "maito-juusto-munat-ja-rasvat",
+      "countFromListing": 104,
+      "totalHits": 104,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 79,
+      "extraPagesNeeded": 4,
+      "totalApiCallsForCategory": 5
+    },
+    {
+      "storeId": "N100",
+      "category": "kuivat-elintarvikkeet-ja-leivonta",
+      "countFromListing": 76,
+      "totalHits": 76,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 51,
+      "extraPagesNeeded": 3,
+      "totalApiCallsForCategory": 4
+    },
+    {
+      "storeId": "N100",
+      "category": "sailykkeet-keitot-ja-ateria-ainekset",
+      "countFromListing": 36,
+      "totalHits": 36,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 11,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "oljyt-etikat-ja-salaattikastikkeet",
+      "countFromListing": 2,
+      "totalHits": 2,
+      "offersInFirstPage": 2,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "mausteet-ja-maustaminen",
+      "countFromListing": 18,
+      "totalHits": 18,
+      "offersInFirstPage": 18,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "texmex-ja-maailman-maut",
+      "countFromListing": 28,
+      "totalHits": 28,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 3,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "pakasteet",
+      "countFromListing": 43,
+      "totalHits": 43,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 18,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "makeiset-ja-naposteltavat",
+      "countFromListing": 143,
+      "totalHits": 143,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 118,
+      "extraPagesNeeded": 5,
+      "totalApiCallsForCategory": 6
+    },
+    {
+      "storeId": "N100",
+      "category": "juomat",
+      "countFromListing": 118,
+      "totalHits": 118,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 93,
+      "extraPagesNeeded": 4,
+      "totalApiCallsForCategory": 5
+    },
+    {
+      "storeId": "N100",
+      "category": "lapset",
+      "countFromListing": 29,
+      "totalHits": 29,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 4,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "lemmikit",
+      "countFromListing": 28,
+      "totalHits": 28,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 3,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "kosmetiikka-terveys-ja-hygienia",
+      "countFromListing": 65,
+      "totalHits": 65,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 40,
+      "extraPagesNeeded": 2,
+      "totalApiCallsForCategory": 3
+    },
+    {
+      "storeId": "N100",
+      "category": "keittio-astiat-ja-kattaus",
+      "countFromListing": 17,
+      "totalHits": 17,
+      "offersInFirstPage": 17,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "kodinhoito-ja-taloustarvikkeet",
+      "countFromListing": 18,
+      "totalHits": 18,
+      "offersInFirstPage": 18,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "kodintekstiilit-ja-sisustus",
+      "countFromListing": 23,
+      "totalHits": 23,
+      "offersInFirstPage": 23,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "kodinkoneet-ja-elektroniikka",
+      "countFromListing": 35,
+      "totalHits": 35,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 10,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    },
+    {
+      "storeId": "N100",
+      "category": "sahko-pienrauta-ja-autotarvikkeet",
+      "countFromListing": 2,
+      "totalHits": 2,
+      "offersInFirstPage": 2,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "kukat-ja-puutarha",
+      "countFromListing": 11,
+      "totalHits": 11,
+      "offersInFirstPage": 11,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "vapaa-aika-ja-urheilu",
+      "countFromListing": 11,
+      "totalHits": 11,
+      "offersInFirstPage": 11,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "kirjat-lehdet-ja-paperitarvikkeet",
+      "countFromListing": 6,
+      "totalHits": 6,
+      "offersInFirstPage": 6,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "kengat-ja-kenkienhoito",
+      "countFromListing": 11,
+      "totalHits": 11,
+      "offersInFirstPage": 11,
+      "paginatedOfferIds": 0,
+      "extraPagesNeeded": 0,
+      "totalApiCallsForCategory": 1
+    },
+    {
+      "storeId": "N100",
+      "category": "vaatteet-ja-asusteet",
+      "countFromListing": 39,
+      "totalHits": 39,
+      "offersInFirstPage": 25,
+      "paginatedOfferIds": 14,
+      "extraPagesNeeded": 1,
+      "totalApiCallsForCategory": 2
+    }
+  ],
+  "timings": [
+    [
+      "stores/search",
+      0.491
+    ],
+    [
+      "offer-categories/N195",
+      0.282
+    ],
+    [
+      "offer-category/N195/hedelmat-ja-vihannekset",
+      0.355
+    ],
+    [
+      "offer-category/N195/leivat-keksit-ja-leivonnaiset",
+      0.372
+    ],
+    [
+      "offer-category/N195/liha-ja-kasviproteiinit",
+      0.372
+    ],
+    [
+      "offer-category/N195/kala-ja-merenelavat",
+      0.439
+    ],
+    [
+      "offer-category/N195/valmisruoka",
+      0.377
+    ],
+    [
+      "offer-category/N195/maito-juusto-munat-ja-rasvat",
+      0.354
+    ],
+    [
+      "offer-category/N195/kuivat-elintarvikkeet-ja-leivonta",
+      0.337
+    ],
+    [
+      "offer-category/N195/sailykkeet-keitot-ja-ateria-ainekset",
+      0.436
+    ],
+    [
+      "offer-category/N195/mausteet-ja-maustaminen",
+      0.301
+    ],
+    [
+      "offer-category/N195/texmex-ja-maailman-maut",
+      0.322
+    ],
+    [
+      "offer-category/N195/pakasteet",
+      0.327
+    ],
+    [
+      "offer-category/N195/makeiset-ja-naposteltavat",
+      0.323
+    ],
+    [
+      "offer-category/N195/juomat",
+      0.352
+    ],
+    [
+      "offer-category/N195/lapset",
+      0.291
+    ],
+    [
+      "offer-category/N195/lemmikit",
+      0.402
+    ],
+    [
+      "offer-category/N195/kosmetiikka-terveys-ja-hygienia",
+      0.374
+    ],
+    [
+      "offer-category/N195/keittio-astiat-ja-kattaus",
+      0.4
+    ],
+    [
+      "offer-category/N195/kodinhoito-ja-taloustarvikkeet",
+      0.336
+    ],
+    [
+      "offer-category/N195/kodintekstiilit-ja-sisustus",
+      0.304
+    ],
+    [
+      "offer-category/N195/kodinkoneet-ja-elektroniikka",
+      0.365
+    ],
+    [
+      "offer-category/N195/sahko-pienrauta-ja-autotarvikkeet",
+      0.301
+    ],
+    [
+      "offer-category/N195/kukat-ja-puutarha",
+      0.331
+    ],
+    [
+      "offer-category/N195/vapaa-aika-ja-urheilu",
+      0.28
+    ],
+    [
+      "offer-category/N195/kirjat-lehdet-ja-paperitarvikkeet",
+      0.339
+    ],
+    [
+      "offer-category/N195/kengat-ja-kenkienhoito",
+      0.304
+    ],
+    [
+      "offer-category/N195/vaatteet-ja-asusteet",
+      0.475
+    ],
+    [
+      "offer-categories/N190",
+      0.361
+    ],
+    [
+      "offer-category/N190/hedelmat-ja-vihannekset",
+      0.349
+    ],
+    [
+      "offer-category/N190/leivat-keksit-ja-leivonnaiset",
+      0.306
+    ],
+    [
+      "offer-category/N190/liha-ja-kasviproteiinit",
+      0.41
+    ],
+    [
+      "offer-category/N190/kala-ja-merenelavat",
+      0.38
+    ],
+    [
+      "offer-category/N190/valmisruoka",
+      0.352
+    ],
+    [
+      "offer-category/N190/maito-juusto-munat-ja-rasvat",
+      0.328
+    ],
+    [
+      "offer-category/N190/kuivat-elintarvikkeet-ja-leivonta",
+      0.346
+    ],
+    [
+      "offer-category/N190/sailykkeet-keitot-ja-ateria-ainekset",
+      0.385
+    ],
+    [
+      "offer-category/N190/oljyt-etikat-ja-salaattikastikkeet",
+      0.342
+    ],
+    [
+      "offer-category/N190/mausteet-ja-maustaminen",
+      0.816
+    ],
+    [
+      "offer-category/N190/texmex-ja-maailman-maut",
+      0.558
+    ],
+    [
+      "offer-category/N190/pakasteet",
+      0.452
+    ],
+    [
+      "offer-category/N190/makeiset-ja-naposteltavat",
+      0.375
+    ],
+    [
+      "offer-category/N190/juomat",
+      0.439
+    ],
+    [
+      "offer-category/N190/lapset",
+      0.381
+    ],
+    [
+      "offer-category/N190/lemmikit",
+      0.322
+    ],
+    [
+      "offer-category/N190/kosmetiikka-terveys-ja-hygienia",
+      0.358
+    ],
+    [
+      "offer-category/N190/keittio-astiat-ja-kattaus",
+      0.431
+    ],
+    [
+      "offer-category/N190/kodinhoito-ja-taloustarvikkeet",
+      0.288
+    ],
+    [
+      "offer-category/N190/kodintekstiilit-ja-sisustus",
+      0.295
+    ],
+    [
+      "offer-category/N190/kodinkoneet-ja-elektroniikka",
+      0.322
+    ],
+    [
+      "offer-category/N190/sahko-pienrauta-ja-autotarvikkeet",
+      0.27
+    ],
+    [
+      "offer-category/N190/kukat-ja-puutarha",
+      0.324
+    ],
+    [
+      "offer-category/N190/vapaa-aika-ja-urheilu",
+      0.335
+    ],
+    [
+      "offer-category/N190/kirjat-lehdet-ja-paperitarvikkeet",
+      0.373
+    ],
+    [
+      "offer-category/N190/kengat-ja-kenkienhoito",
+      0.295
+    ],
+    [
+      "offer-category/N190/vaatteet-ja-asusteet",
+      0.38
+    ],
+    [
+      "offer-categories/N100",
+      0.366
+    ],
+    [
+      "offer-category/N100/hedelmat-ja-vihannekset",
+      0.285
+    ],
+    [
+      "offer-category/N100/leivat-keksit-ja-leivonnaiset",
+      0.341
+    ],
+    [
+      "offer-category/N100/liha-ja-kasviproteiinit",
+      0.316
+    ],
+    [
+      "offer-category/N100/kala-ja-merenelavat",
+      0.335
+    ],
+    [
+      "offer-category/N100/valmisruoka",
+      0.298
+    ],
+    [
+      "offer-category/N100/maito-juusto-munat-ja-rasvat",
+      0.33
+    ],
+    [
+      "offer-category/N100/kuivat-elintarvikkeet-ja-leivonta",
+      0.406
+    ],
+    [
+      "offer-category/N100/sailykkeet-keitot-ja-ateria-ainekset",
+      0.31
+    ],
+    [
+      "offer-category/N100/oljyt-etikat-ja-salaattikastikkeet",
+      0.362
+    ],
+    [
+      "offer-category/N100/mausteet-ja-maustaminen",
+      0.362
+    ],
+    [
+      "offer-category/N100/texmex-ja-maailman-maut",
+      0.362
+    ],
+    [
+      "offer-category/N100/pakasteet",
+      0.338
+    ],
+    [
+      "offer-category/N100/makeiset-ja-naposteltavat",
+      0.454
+    ],
+    [
+      "offer-category/N100/juomat",
+      0.357
+    ],
+    [
+      "offer-category/N100/lapset",
+      0.412
+    ],
+    [
+      "offer-category/N100/lemmikit",
+      0.284
+    ],
+    [
+      "offer-category/N100/kosmetiikka-terveys-ja-hygienia",
+      0.366
+    ],
+    [
+      "offer-category/N100/keittio-astiat-ja-kattaus",
+      0.35
+    ],
+    [
+      "offer-category/N100/kodinhoito-ja-taloustarvikkeet",
+      0.397
+    ],
+    [
+      "offer-category/N100/kodintekstiilit-ja-sisustus",
+      0.306
+    ],
+    [
+      "offer-category/N100/kodinkoneet-ja-elektroniikka",
+      0.538
+    ],
+    [
+      "offer-category/N100/sahko-pienrauta-ja-autotarvikkeet",
+      0.33
+    ],
+    [
+      "offer-category/N100/kukat-ja-puutarha",
+      0.309
+    ],
+    [
+      "offer-category/N100/vapaa-aika-ja-urheilu",
+      0.242
+    ],
+    [
+      "offer-category/N100/kirjat-lehdet-ja-paperitarvikkeet",
+      0.285
+    ],
+    [
+      "offer-category/N100/kengat-ja-kenkienhoito",
+      0.298
+    ],
+    [
+      "offer-category/N100/vaatteet-ja-asusteet",
+      0.296
+    ]
+  ]
+}

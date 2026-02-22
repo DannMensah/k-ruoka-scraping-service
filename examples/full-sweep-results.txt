@@ -1,0 +1,149 @@
+Fetching all stores...
+  → 1060 stores
+
+  [1/1060] K‑Citymarket Helsinki Columbus (N195)  [5s elapsed, ~0s remaining, 0 errors (0.0%)]
+  [51/1060] K‑Citymarket Joensuu Pilkko (N130)  [70s elapsed, ~1382s remaining, 0 errors (0.0%)]
+  [101/1060] K‑Supermarket Hirvensalo (S345)  [131s elapsed, ~1247s remaining, 0 errors (0.0%)]
+  [151/1060] K‑Supermarket Kompass (S561)  [192s elapsed, ~1156s remaining, 0 errors (0.0%)]
+  [201/1060] K‑Supermarket Nastola (S226)  [253s elapsed, ~1083s remaining, 0 errors (0.0%)]
+  [251/1060] K‑Supermarket Seinäjoki (S308)  [315s elapsed, ~1016s remaining, 0 errors (0.0%)]
+  [301/1060] K‑Market Hillamarket (K382)  [382s elapsed, ~964s remaining, 0 errors (0.0%)]
+  [351/1060] K‑Market Lapinpata (K607)  [447s elapsed, ~903s remaining, 0 errors (0.0%)]
+  [401/1060] K‑Market Puumala (K254)  [509s elapsed, ~836s remaining, 0 errors (0.0%)]
+  [451/1060] K‑Market Veto (K584)  [576s elapsed, ~778s remaining, 0 errors (0.0%)]
+  [501/1060] K‑Supermarket Ruokaniitty (S553)  [639s elapsed, ~713s remaining, 0 errors (0.0%)]
+  [551/1060] K‑Market Föglöbutiken (K102)  [703s elapsed, ~650s remaining, 0 errors (0.0%)]
+  [601/1060] K‑Market Inkivääri (K604)  [768s elapsed, ~586s remaining, 0 errors (0.0%)]
+  [651/1060] K‑Market Kaunisranta (K166)  [830s elapsed, ~522s remaining, 0 errors (0.0%)]
+  [701/1060] K‑Market Kulmatori (K948)  [891s elapsed, ~456s remaining, 0 errors (0.0%)]
+  [751/1060] K‑Market Lohjanportti (K637)  [953s elapsed, ~392s remaining, 0 errors (0.0%)]
+  [801/1060] K‑Market Mustio (L349)  [1017s elapsed, ~329s remaining, 0 errors (0.0%)]
+  [851/1060] K‑Market Pelimies (L400)  [1079s elapsed, ~265s remaining, 0 errors (0.0%)]
+  [901/1060] K‑Market Rastila (L452)  [1141s elapsed, ~201s remaining, 0 errors (0.0%)]
+  [951/1060] K‑Market Siilitie (L484)  [1206s elapsed, ~138s remaining, 0 errors (0.0%)]
+  [1001/1060] K‑Market Treffis (L376)  [1268s elapsed, ~75s remaining, 0 errors (0.0%)]
+  [1051/1060] K‑Market Vårdö (K124)  [1332s elapsed, ~11s remaining, 0 errors (0.0%)]
+  [1060/1060] K‑Market Östersundom (L596)  [1343s elapsed, ~0s remaining, 0 errors (0.0%)]
+
+======================================================================
+FULL SWEEP RESULTS  (using search-offers endpoint)
+======================================================================
+
+Stores analysed: 1060
+Errors:          0
+API calls made:  1061
+Wall time:       1345s (22.4min)
+
+Stores by chain:
+  kmarket                     722 stores,   129629 total offers, avg 180/store  
+  ksupermarket                254 stores,   125206 total offers, avg 493/store  
+  kcitymarket                  84 stores,    89368 total offers, avg 1064/store 
+
+Offers per store:
+  Min:    0
+  Max:    1650
+  Mean:   324.7
+  Median: 200
+  Stdev:  267.3
+  P5:     126
+  P25:    157
+  P75:    431
+  P95:    977
+  Total:  344203
+  Stores with 0 offers: 1
+
+  Offers/store distribution:
+        0-0    :     1 (  0.1%) █
+        1-50   :     4 (  0.4%) █
+       51-100  :     3 (  0.3%) █
+      101-200  :   524 ( 49.4%) ████████████████████████████████████████        
+      201-400  :   229 ( 21.6%) █████████████████
+      401-600  :   177 ( 16.7%) ██████████████
+      601-800  :    41 (  3.9%) ███
+      801-1000 :    34 (  3.2%) ███
+     1001-1500 :    44 (  4.2%) ███
+     1501-2000 :     3 (  0.3%) █
+     2001+    :     0 (  0.0%)
+
+======================================================================
+API CALL ESTIMATES FOR FULL SYNC  (search-offers, page size 48)
+======================================================================
+  Stores call:                     1
+  Count calls (1/store):           1060
+  Offer page calls (paginate):     7686
+  TOTAL API CALLS:                 8747
+
+  Sequential time estimate:        8747s (146min, 2.4h)
+    (at 0.5s/call + 0.5s delay)
+
+  Comparison with old approach (offer-category, page 25):
+    Old total API calls:           15343
+    New total API calls:           8747
+    Savings:                       6596 calls (43%)
+
+  API calls per store (just offer pages):
+    Min:    0
+    Max:    35
+    Mean:   7.3
+    Median: 5
+    P95:    21
+
+  Time per store (count + offer pages):
+    Min:    1s
+    Max:    36s
+    Mean:   8s
+    Median: 6s
+    P95:    22s
+    Stores exceeding 5 min: 0
+
+Top 20 stores by offer count:
+  Store                                         Chain            Offers  Pages  ~Time
+  --------------------------------------------- --------------- ------- ------ ------
+  K‑Citymarket Turku Kupittaa                   kcitymarket        1650     35    36s
+  K‑Citymarket Tampere Turtola                  kcitymarket        1542     33    34s
+  K‑Citymarket Espoo Sello                      kcitymarket        1501     32    33s
+  K‑Citymarket Turku Länsikeskus                kcitymarket        1483     31    32s
+  K‑Citymarket Oulu Kaakkuri                    kcitymarket        1461     31    32s
+  K‑Citymarket Tampere Lielahti                 kcitymarket        1455     31    32s
+  K‑Citymarket Pirkkala                         kcitymarket        1354     29    30s
+  K‑Citymarket Oulu Rusko                       kcitymarket        1346     29    30s
+  K‑Citymarket Vantaa Tammisto                  kcitymarket        1321     28    29s
+  K‑Citymarket Helsinki Easton                  kcitymarket        1306     28    29s
+  K‑Citymarket Jyväskylä Seppälä                kcitymarket        1283     27    28s
+  K‑Citymarket Kuopio Kolmisoppi                kcitymarket        1267     27    28s
+  K‑Citymarket Jyväskylä Keljo                  kcitymarket        1264     27    28s
+  K‑Citymarket Seinäjoki Ideapark               kcitymarket        1252     27    28s
+  K‑Citymarket Rauma                            kcitymarket        1228     26    27s
+  K‑Citymarket Salo                             kcitymarket        1228     26    27s
+  K‑Citymarket Lahti Karisma                    kcitymarket        1227     26    27s
+  K‑Citymarket Espoo Iso Omena                  kcitymarket        1211     26    27s
+  K‑Citymarket Hämeenlinna Tiiriö               kcitymarket        1201     26    27s
+  K‑Citymarket Helsinki Malmi                   kcitymarket        1192     25    26s
+
+  K‑Citymarket Helsinki Malmi                   kcitymarket        1192     25    26s
+
+Bottom 20 stores by offer count:
+  Store                                         Chain            Offers
+  --------------------------------------------- --------------- -------
+  K‑Market RukaValley                           kmarket               0
+  K‑Market Erkinkulma                           kmarket               1
+  K‑Market Pukinmäki                            kmarket               2
+  K‑Market Kookos                               kmarket               5
+  K‑Market Kilo                                 kmarket              13
+  K‑Market Vårdö                                kmarket              82
+  K‑Market Rukankylä                            kmarket              93
+  K‑Market Freda                                kmarket              94
+  K‑Market Linnavuori                           kmarket             102
+  K‑Market Kasinonranta                         kmarket             104
+  K‑Market Lönnrotinkatu                        kmarket             104
+  K‑Market Kaulamo                              kmarket             105
+  K‑Market DIXI                                 kmarket             107
+  K‑Market Föglöbutiken                         kmarket             109
+  K‑Market Haapaniemenkatu                      kmarket             110
+  K‑Market Kisahalli                            kmarket             111
+  K‑Market Koulumäki                            kmarket             111
+  K‑Market Meclu                                kmarket             112
+  K‑Market Vesala                               kmarket             112
+  K‑Market Kauppapuistikko                      kmarket             113
+
+Raw data written to C:\Users\dannm\Documents\developer\k-ruoka-scraping-service\examples\full-sweep-results.json

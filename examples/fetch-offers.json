@@ -1,0 +1,387 @@
+{
+    "storeId": "N110",
+    "offers": [
+        {
+            "id": "301851P",
+            "title": "Myrttisen mini perinteiset suola- ja maustekurkut 240 g",
+            "localizedTitle": {
+                "english": "Myrtinen's mini traditional salt and spice cucumbers 240g 6.00/2 pc Individually",
+                "finnish": "Myrttisen mini perinteiset suola- ja maustekurkut 240 g",
+                "swedish": "Myrtinens mini traditionella salt- och kryddgurkor 240g 6,00/2 st Individuellt"
+            },
+            "products": [
+                {
+                    "id": "6430025259949",
+                    "product": {
+                        "type": "product",
+                        "id": "6430025259949",
+                        "ean": "6430025259949",
+                        "baseEan": "6430025259949",
+                        "localizedName": {
+                            "finnish": "Myrttisen Minikurkut 240 g",
+                            "swedish": "Myrttisen Minigurkor 240 g",
+                            "english": "Myrttisen Mini cucumbers 240 g"
+                        },
+                        "store": {
+                            "id": "N110",
+                            "isLocal": false
+                        },
+                        "availability": {
+                            "store": true,
+                            "web": true
+                        },
+                        "isAvailable": true,
+                        "category": {
+                            "tree": [
+                                {
+                                    "localizedName": {
+                                        "finnish": "Hedelmät ja vihannekset",
+                                        "english": "Fruit and vegetables",
+                                        "swedish": "Frukt och grönt"
+                                    },
+                                    "slug": "hedelmat-ja-vihannekset"
+                                },
+                                {
+                                    "localizedName": {
+                                        "finnish": "Vihannekset",
+                                        "english": "Vegetables",
+                                        "swedish": "Grönsaker"
+                                    },
+                                    "slug": "hedelmat-ja-vihannekset/vihannekset"
+                                },
+                                {
+                                    "localizedName": {
+                                        "finnish": "Mauste- ja suolakurkut",
+                                        "english": "Pickles",
+                                        "swedish": "Ättiksgurka"
+                                    },
+                                    "slug": "hedelmat-ja-vihannekset/vihannekset/mauste-ja-suolakurkut"
+                                }
+                            ],
+                            "localizedName": {
+                                "finnish": "Hedelmät ja vihannekset",
+                                "english": "Fruit and vegetables",
+                                "swedish": "Frukt och grönt"
+                            },
+                            "path": "hedelmat-ja-vihannekset/vihannekset/mauste-ja-suolakurkut",
+                            "order": 11
+                        },
+                        "productAttributes": {
+                            "ean": "6430025259949",
+                            "section": "1618",
+                            "urlSlug": "myrttisen-minikurkut-240-g-6430025259949",
+                            "description": {},
+                            "labelName": {
+                                "fi": "Myrttisen Minikurkut 240 g",
+                                "sv": "Myrttisen Minigurkor 240 g"
+                            },
+                            "marketingName": {
+                                "en": "Myrttisen Mini cucumbers 240 g",
+                                "fi": "Myrttisen Minikurkut 240 g",
+                                "sv": "Myrttisen Minigurkor 240 g"
+                            },
+                            "origin": {
+                                "domestic": true,
+                                "countryOfOrigin": "fi",
+                                "countryOfOriginI18n": {
+                                    "en": "Finland",
+                                    "fi": "Suomi",
+                                    "sv": "Finland"
+                                }
+                            },
+                            "measurements": {
+                                "width": 9.5,
+                                "height": 11.5,
+                                "length": 9.5,
+                                "netWeight": 0.24,
+                                "contentSize": 0.24,
+                                "contentUnit": "kg",
+                                "grossWeight": 0.5
+                            },
+                            "meta": {
+                                "source": "tps",
+                                "isAlcohol": false,
+                                "isUtility": false,
+                                "alcoholStatus": "allowed",
+                                "deprecatedEan": false,
+                                "hiddenInRecipe": false,
+                                "isInternalCode": false,
+                                "canBeShownInWeb": true
+                            },
+                            "pimId": "22016888",
+                            "image": {
+                                "url": "https://public.keskofiles.com/f/k-ruoka/product/6430025259949"
+                            }
+                        },
+                        "images": [
+                            "https://public.keskofiles.com/f/k-ruoka/product/6430025259949",
+                            "https://public.keskofiles.com/f/k-ruoka/product/0NNH0/6430025259949"
+                        ],
+                        "popularity": 216.5,
+                        "kind": "v3",
+                        "isReferenceEan": false,
+                        "section": "1618",
+                        "mobilescan": {
+                            "pricing": {
+                                "normal": {
+                                    "unit": "kpl",
+                                    "localizedUnit": {
+                                        "fi": "kpl",
+                                        "sv": "st"
+                                    },
+                                    "isApproximate": false,
+                                    "soldBy": {
+                                        "kind": "piece"
+                                    },
+                                    "price": 4.99,
+                                    "unitPrice": {
+                                        "value": 20.79,
+                                        "unit": "kg",
+                                        "contentSize": 0.24
+                                    }
+                                },
+                                "batch": {
+                                    "unit": "kpl",
+                                    "localizedUnit": {
+                                        "fi": "kpl",
+                                        "sv": "st"
+                                    },
+                                    "isApproximate": false,
+                                    "soldBy": {
+                                        "kind": "piece"
+                                    },
+                                    "price": 6,
+                                    "discountPercentage": 39,
+                                    "discountType": "STANDARD",
+                                    "startDate": "2026-02-11T22:00:00.000Z",
+                                    "endDate": "2026-02-15T21:59:59.000Z",
+                                    "validNumberOfDaysLeft": 2,
+                                    "discountAvailability": {
+                                        "web": true,
+                                        "store": true
+                                    },
+                                    "unitPrice": {
+                                        "value": 12.5,
+                                        "unit": "kg",
+                                        "contentSize": 0.48
+                                    },
+                                    "amount": 2,
+                                    "campaignId": "200083711",
+                                    "discountSource": "SAP"
+                                },
+                                "libraryVersion": "2.31.0"
+                            },
+                            "discountLimited": false,
+                            "vat": 13.5
+                        },
+                        "adInfo": {
+                            "highlightAd": false,
+                            "isSponsored": false
+                        },
+                        "brand": {
+                            "id": "11570",
+                            "name": "Myrttisen Kurkut",
+                            "slug": "myrttisen-kurkut-11570"
+                        }
+                    },
+                    "score": 0,
+                    "type": "product"
+                },
+                {
+                    "id": "6418388005168",
+                    "product": {
+                        "type": "product",
+                        "id": "6418388005168",
+                        "ean": "6418388005168",
+                        "baseEan": "6418388005168",
+                        "localizedName": {
+                            "finnish": "Myrttisen Minimaustekurkut 240g",
+                            "swedish": "Myrttisen Minikryddgurkor 240g",
+                            "english": "Myrttisen Mini pickled cucumbers 240g"
+                        },
+                        "store": {
+                            "id": "N110",
+                            "isLocal": false
+                        },
+                        "availability": {
+                            "store": true,
+                            "web": true
+                        },
+                        "isAvailable": true,
+                        "category": {
+                            "tree": [
+                                {
+                                    "localizedName": {
+                                        "finnish": "Hedelmät ja vihannekset",
+                                        "english": "Fruit and vegetables",
+                                        "swedish": "Frukt och grönt"
+                                    },
+                                    "slug": "hedelmat-ja-vihannekset"
+                                },
+                                {
+                                    "localizedName": {
+                                        "finnish": "Vihannekset",
+                                        "english": "Vegetables",
+                                        "swedish": "Grönsaker"
+                                    },
+                                    "slug": "hedelmat-ja-vihannekset/vihannekset"
+                                },
+                                {
+                                    "localizedName": {
+                                        "finnish": "Mauste- ja suolakurkut",
+                                        "english": "Pickles",
+                                        "swedish": "Ättiksgurka"
+                                    },
+                                    "slug": "hedelmat-ja-vihannekset/vihannekset/mauste-ja-suolakurkut"
+                                }
+                            ],
+                            "localizedName": {
+                                "finnish": "Hedelmät ja vihannekset",
+                                "english": "Fruit and vegetables",
+                                "swedish": "Frukt och grönt"
+                            },
+                            "path": "hedelmat-ja-vihannekset/vihannekset/mauste-ja-suolakurkut",
+                            "order": 11
+                        },
+                        "productAttributes": {
+                            "ean": "6418388005168",
+                            "section": "1618",
+                            "urlSlug": "myrttisen-minimaustekurkut-240g-6418388005168",
+                            "description": {},
+                            "labelName": {
+                                "fi": "Myrttisen Minimaustekurkut 240g",
+                                "sv": "Myrttisen Minigurkor 240g"
+                            },
+                            "marketingName": {
+                                "en": "Myrttisen Mini pickled cucumbers 240g",
+                                "fi": "Myrttisen Minimaustekurkut 240g",
+                                "sv": "Myrttisen Minikryddgurkor 240g"
+                            },
+                            "origin": {
+                                "domestic": true,
+                                "countryOfOriginI18n": {
+                                    "en": "Euroopan unioni",
+                                    "fi": "Euroopan unioni",
+                                    "sv": "EU"
+                                }
+                            },
+                            "measurements": {
+                                "width": 9.5,
+                                "height": 11.5,
+                                "length": 9.5,
+                                "netWeight": 0.24,
+                                "contentSize": 0.24,
+                                "contentUnit": "kg",
+                                "grossWeight": 0.5
+                            },
+                            "meta": {
+                                "source": "tps",
+                                "isAlcohol": false,
+                                "isUtility": false,
+                                "alcoholStatus": "allowed",
+                                "deprecatedEan": false,
+                                "hiddenInRecipe": false,
+                                "isInternalCode": false,
+                                "canBeShownInWeb": true
+                            },
+                            "pimId": "22081656",
+                            "image": {
+                                "url": "https://public.keskofiles.com/f/k-ruoka/product/6418388005168"
+                            }
+                        },
+                        "images": [
+                            "https://public.keskofiles.com/f/k-ruoka/product/6418388005168",
+                            "https://public.keskofiles.com/f/k-ruoka/product/0NNH0/6418388005168"
+                        ],
+                        "popularity": 174.89999389648438,
+                        "kind": "v3",
+                        "isReferenceEan": false,
+                        "section": "1618",
+                        "mobilescan": {
+                            "pricing": {
+                                "normal": {
+                                    "unit": "kpl",
+                                    "localizedUnit": {
+                                        "fi": "kpl",
+                                        "sv": "st"
+                                    },
+                                    "isApproximate": false,
+                                    "soldBy": {
+                                        "kind": "piece"
+                                    },
+                                    "price": 4.99,
+                                    "unitPrice": {
+                                        "value": 20.79,
+                                        "unit": "kg",
+                                        "contentSize": 0.24
+                                    }
+                                },
+                                "batch": {
+                                    "unit": "kpl",
+                                    "localizedUnit": {
+                                        "fi": "kpl",
+                                        "sv": "st"
+                                    },
+                                    "isApproximate": false,
+                                    "soldBy": {
+                                        "kind": "piece"
+                                    },
+                                    "price": 6,
+                                    "discountPercentage": 39,
+                                    "discountType": "STANDARD",
+                                    "startDate": "2026-02-11T22:00:00.000Z",
+                                    "endDate": "2026-02-15T21:59:59.000Z",
+                                    "validNumberOfDaysLeft": 2,
+                                    "discountAvailability": {
+                                        "web": true,
+                                        "store": true
+                                    },
+                                    "unitPrice": {
+                                        "value": 12.5,
+                                        "unit": "kg",
+                                        "contentSize": 0.48
+                                    },
+                                    "amount": 2,
+                                    "campaignId": "200083711",
+                                    "discountSource": "SAP"
+                                },
+                                "libraryVersion": "2.31.0"
+                            },
+                            "discountLimited": false,
+                            "vat": 13.5
+                        },
+                        "adInfo": {
+                            "highlightAd": false,
+                            "isSponsored": false
+                        }
+                    },
+                    "score": 0,
+                    "type": "product"
+                }
+            ],
+            "image": "https://public.keskofiles.com/f/k-ruoka-offers/200083711_01/769f7b4f-f723-4460-a033-ff5c0792907c",
+            "pricing": {
+                "price": 6,
+                "unit": {
+                    "fi": "2 kpl",
+                    "sv": "2 kpl"
+                },
+                "discountType": "STANDARD",
+                "discountAvailability": {
+                    "web": true,
+                    "store": true
+                }
+            },
+            "normalPricing": {
+                "price": 4.99,
+                "unit": {
+                    "fi": "kpl",
+                    "sv": "st"
+                }
+            },
+            "offerType": "chain",
+            "campaignId": "200083711",
+            "offerNameId": "200083711_00003"
+        }
+    ]
+}
