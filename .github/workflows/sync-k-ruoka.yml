@@ -18,7 +18,7 @@ on:
 
 concurrency:
   group: k-ruoka-sync
-  cancel-in-progress: false  # let running syncs finish
+  cancel-in-progress: true  # new push cancels any running sync
 
 jobs:
   sync:
