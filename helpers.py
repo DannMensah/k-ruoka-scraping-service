@@ -1,7 +1,21 @@
+"""
+K-Ruoka API helpers — transport layer with Cloudflare bypass.
+
+CF bypass strategies (tried in order):
+  1. FlareSolverr  – free Docker service, runs on GitHub Actions
+  2. 2Captcha      – paid Turnstile solving ($3 deposit lasts ~1 year)
+  3. Direct browser – Patchright headless with Turnstile auto-click (unreliable)
+
+After the CF challenge is solved, all API calls use curl_cffi with Chrome TLS
+impersonation + the obtained cf_clearance cookies.  This is much faster than
+browser-based fetch().
+"""
 import time
 import json
 import logging
+import math
 import os
+from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
 
@@ -15,87 +29,438 @@ API_HEADERS = {
 # API constraints discovered via benchmarking
 MAX_OFFER_CATEGORY_LIMIT = 25  # API returns 400 for anything above 25
 SEARCH_OFFERS_PAGE_SIZE = 48   # search-offers returns up to 48 per page
-DELAY_BETWEEN_CALLS = 0.5  # seconds between API calls to avoid rate-limiting
+DELAY_BETWEEN_CALLS = 0.5      # seconds between API calls to avoid rate-limiting
 MAX_RETRIES = 2
-RETRY_BACKOFF = 1.5  # seconds, multiplied by attempt number
+RETRY_BACKOFF = 1.5             # seconds, multiplied by attempt number
+
+# Helsinki geo-filtering
+HELSINKI_LAT = 60.1699
+HELSINKI_LON = 24.9384
+MAX_DISTANCE_KM = 50
+
 
 # ---------------------------------------------------------------------------
-# Browser transport — uses DrissionPage (real Chrome) to bypass Cloudflare
+# CF bypass session management
 # ---------------------------------------------------------------------------
 
-_browser = None  # ChromiumPage singleton
+_session = None  # curl_cffi Session with CF cookies
 
 
-def _get_browser():
-    """Lazy-init the DrissionPage browser singleton.
+def _ensure_session():
+    """Get or create an authenticated curl_cffi session with CF cookies."""
+    global _session
+    if _session is not None:
+        return _session
 
-    Opens Chrome, navigates to K-Ruoka to solve any Cloudflare challenge,
-    then keeps the tab open for subsequent fetch() calls.
+    from curl_cffi.requests import Session
+
+    cookies, user_agent = _resolve_cloudflare()
+
+    _session = Session(impersonate="chrome")
+    _session.headers.update({
+        "User-Agent": user_agent,
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        **API_HEADERS,
+    })
+    for name, value in cookies.items():
+        _session.cookies.set(name, value, domain=".k-ruoka.fi")
+
+    # Verify the session works
+    _verify_session()
+    return _session
+
+
+def _verify_session():
+    """Quick smoke-test that the session can reach K-Ruoka API."""
+    global _session
+    resp = _session.post(
+        f"{BASE_URL}/stores/search",
+        json={"query": "", "offset": 0, "limit": 1},
+    )
+    if resp.status_code == 403:
+        logger.warning("Session verification got 403 — CF cookies may be invalid")
+        raise RuntimeError("CF session is not valid (403)")
+    logger.info("Session verified (stores/search → %d)", resp.status_code)
+
+
+def _resolve_cloudflare() -> tuple[dict, str]:
+    """Resolve the CF challenge using the best available strategy.
+
+    Returns (cookies_dict, user_agent).
     """
-    global _browser
-    if _browser is not None:
-        return _browser
+    strategies = []
 
-    from DrissionPage import ChromiumPage, ChromiumOptions
+    # Strategy 1: FlareSolverr (free, Docker service)
+    if os.environ.get("FLARESOLVERR_URL"):
+        strategies.append(("FlareSolverr", _resolve_cf_flaresolverr))
 
-    opts = ChromiumOptions()
+    # Strategy 2: 2Captcha (cheap, reliable)
+    if os.environ.get("CAPTCHA_API_KEY"):
+        strategies.append(("2Captcha", _resolve_cf_2captcha))
 
-    chrome_paths = [
-        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
-    ]
-    for p in chrome_paths:
-        if os.path.isfile(p):
-            opts.set_browser_path(p)
-            break
+    # Strategy 3: Direct browser (auto-click, unreliable)
+    strategies.append(("Browser", _resolve_cf_browser))
 
-    # Use a dedicated profile so we don't conflict with the user's Chrome
-    profile_dir = os.path.join(os.path.dirname(__file__), ".chrome-profile")
-    opts.set_user_data_path(profile_dir)
-
-    logger.info("Launching Chrome via DrissionPage...")
-    _browser = ChromiumPage(opts)
-
-    # Navigate to K-Ruoka to trigger and (hopefully) resolve CF challenge
-    _browser.get(SITE_URL + "/kauppa")
-    _wait_for_cloudflare(_browser)
-
-    return _browser
-
-
-def _wait_for_cloudflare(page, timeout: int = 60):
-    """Wait for Cloudflare challenge to clear. Prompts user if needed."""
-    for i in range(timeout):
-        title = page.title or ""
-        if "moment" not in title.lower() and "verif" not in title.lower():
-            logger.info("Cloudflare challenge cleared (title: %s)", title)
-            return
-        if i == 5:
-            logger.warning(
-                "Cloudflare challenge detected — if a 'Verify you are human' "
-                "checkbox appeared in the Chrome window, please click it."
+    last_error = None
+    for name, fn in strategies:
+        try:
+            logger.info("Trying CF bypass: %s...", name)
+            cookies, ua = fn()
+            logger.info(
+                "CF bypass succeeded with %s (cookies: %s)",
+                name, list(cookies.keys()),
             )
-        time.sleep(1)
+            return cookies, ua
+        except Exception as e:
+            logger.warning("CF bypass via %s failed: %s", name, e)
+            last_error = e
+
     raise RuntimeError(
-        "Cloudflare challenge did not resolve within %ds. "
-        "Please solve it manually in the Chrome window and retry." % timeout
+        f"All CF bypass strategies failed. Last error: {last_error}"
     )
 
 
-def close_browser():
-    """Shut down the browser when done."""
-    global _browser
-    if _browser is not None:
+# ---------------------------------------------------------------------------
+# Strategy 1: FlareSolverr
+# ---------------------------------------------------------------------------
+
+def _resolve_cf_flaresolverr() -> tuple[dict, str]:
+    """Use FlareSolverr service to solve Cloudflare challenge."""
+    import requests as stdlib_requests
+
+    url = os.environ["FLARESOLVERR_URL"]
+    logger.info("FlareSolverr request to %s...", url)
+
+    resp = stdlib_requests.post(url, json={
+        "cmd": "request.get",
+        "url": f"{SITE_URL}/kauppa",
+        "maxTimeout": 90000,
+    }, timeout=120)
+
+    data = resp.json()
+    if data.get("status") != "ok":
+        raise RuntimeError(
+            f"FlareSolverr returned status={data.get('status')}: {data}"
+        )
+
+    solution = data["solution"]
+    cookies = {}
+    for c in solution.get("cookies", []):
+        cookies[c["name"]] = c["value"]
+
+    user_agent = solution.get("userAgent", "")
+    if "cf_clearance" not in cookies:
+        raise RuntimeError(
+            "FlareSolverr did not return cf_clearance cookie"
+        )
+
+    logger.info(
+        "FlareSolverr OK — got %d cookies, UA=%s",
+        len(cookies), user_agent[:60],
+    )
+    return cookies, user_agent
+
+
+# ---------------------------------------------------------------------------
+# Strategy 2: 2Captcha (Turnstile solver)
+# ---------------------------------------------------------------------------
+
+def _resolve_cf_2captcha() -> tuple[dict, str]:
+    """Use 2Captcha to solve the Cloudflare Turnstile, then extract cookies."""
+    api_key = os.environ["CAPTCHA_API_KEY"]
+    sitekey = _get_turnstile_sitekey()
+
+    logger.info("Sending Turnstile to 2Captcha (sitekey=%s)...", sitekey[:20])
+
+    import requests as stdlib_requests
+
+    # Submit the task
+    resp = stdlib_requests.post("https://2captcha.com/in.php", data={
+        "key": api_key,
+        "method": "turnstile",
+        "sitekey": sitekey,
+        "pageurl": f"{SITE_URL}/kauppa",
+        "json": 1,
+    }, timeout=30)
+    result = resp.json()
+    if result.get("status") != 1:
+        raise RuntimeError(f"2Captcha submit failed: {result}")
+
+    task_id = result["request"]
+    logger.info("2Captcha task submitted: %s — polling...", task_id)
+
+    # Poll for the solved token (up to 120s)
+    token = None
+    for _ in range(40):
+        time.sleep(5)
+        resp = stdlib_requests.get("https://2captcha.com/res.php", params={
+            "key": api_key,
+            "action": "get",
+            "id": task_id,
+            "json": 1,
+        }, timeout=15)
+        result = resp.json()
+        if result.get("status") == 1:
+            token = result["request"]
+            break
+        if result.get("request") != "CAPCHA_NOT_READY":
+            raise RuntimeError(f"2Captcha error: {result}")
+
+    if not token:
+        raise RuntimeError("2Captcha did not return a solution in time")
+
+    logger.info("2Captcha solved! Injecting token via browser...")
+
+    # Use Patchright to inject the solved token and harvest cookies
+    return _inject_turnstile_token(token)
+
+
+def _get_turnstile_sitekey() -> str:
+    """Fetch the K-Ruoka page HTML and extract the Turnstile sitekey."""
+    import re
+    from curl_cffi import requests as cf_requests
+
+    resp = cf_requests.get(
+        f"{SITE_URL}/kauppa", impersonate="chrome", timeout=15,
+    )
+    html = resp.text
+
+    # Pattern 1: data-sitekey="..."
+    match = re.search(r'data-sitekey="([^"]+)"', html)
+    if match:
+        return match.group(1)
+    # Pattern 2: sitekey: '...' or siteKey: '...'
+    match = re.search(r"site[Kk]ey[\"\\s:]+[\"']([^\"']+)[\"']", html)
+    if match:
+        return match.group(1)
+    # Pattern 3: turnstile render call
+    match = re.search(
+        r"turnstile\.render\([^)]*sitekey[\"\\s:]+[\"']([^\"']+)", html,
+    )
+    if match:
+        return match.group(1)
+
+    raise RuntimeError("Could not find Turnstile sitekey in page HTML")
+
+
+def _inject_turnstile_token(token: str) -> tuple[dict, str]:
+    """Start a browser, load the CF challenge page, inject the solved token,
+    and return the resulting cookies + user agent."""
+    from patchright.sync_api import sync_playwright
+
+    pw = sync_playwright().start()
+    profile_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), ".chrome-profile",
+    )
+    os.makedirs(profile_dir, exist_ok=True)
+
+    try:
+        ctx = pw.chromium.launch_persistent_context(
+            user_data_dir=profile_dir,
+            headless=False,
+            args=["--no-first-run", "--no-default-browser-check"],
+            viewport={"width": 1920, "height": 1080},
+        )
+        page = ctx.pages[0] if ctx.pages else ctx.new_page()
+        page.goto(
+            f"{SITE_URL}/kauppa",
+            wait_until="domcontentloaded", timeout=60000,
+        )
+        time.sleep(3)
+
+        # Inject the token via Turnstile callback
+        safe_token = token.replace("\\", "\\\\").replace('"', '\\"')
+        page.evaluate(
+            """
+            (() => {
+                // Find the Turnstile response element and set it
+                const el = document.querySelector(
+                    'input[name="cf-turnstile-response"],'
+                    + ' textarea[name="cf-turnstile-response"]'
+                );
+                if (el) el.value = "%s";
+
+                // Try the cf_chl_opt callback
+                if (typeof window._cf_chl_opt !== 'undefined'
+                    && window._cf_chl_opt.chlApiCb) {
+                    window._cf_chl_opt.chlApiCb("%s");
+                }
+            })()
+            """
+            % (safe_token, safe_token)
+        )
+        time.sleep(5)
+
+        # Wait for CF to resolve
+        for _ in range(30):
+            try:
+                title = page.title() or ""
+            except Exception:
+                time.sleep(2)
+                continue
+            if "moment" not in title.lower() and "verif" not in title.lower():
+                break
+            time.sleep(1)
+
+        # Extract cookies
+        cookies_list = ctx.cookies()
+        cookies = {
+            c["name"]: c["value"]
+            for c in cookies_list
+            if "k-ruoka" in c.get("domain", "")
+        }
+        ua = page.evaluate("navigator.userAgent") or ""
+
+        if "cf_clearance" not in cookies:
+            raise RuntimeError(
+                "Token injection did not produce cf_clearance cookie"
+            )
+
+        return cookies, ua
+    finally:
         try:
-            _browser.quit()
+            ctx.close()
         except Exception:
             pass
-        _browser = None
+        try:
+            pw.stop()
+        except Exception:
+            pass
 
+
+# ---------------------------------------------------------------------------
+# Strategy 3: Direct browser (auto-click — unreliable last resort)
+# ---------------------------------------------------------------------------
+
+def _resolve_cf_browser() -> tuple[dict, str]:
+    """Launch Patchright browser and try to auto-click Turnstile."""
+    from patchright.sync_api import sync_playwright
+
+    pw = sync_playwright().start()
+    profile_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), ".chrome-profile",
+    )
+    os.makedirs(profile_dir, exist_ok=True)
+
+    try:
+        logger.info("Launching Patchright browser for direct CF bypass...")
+        ctx = pw.chromium.launch_persistent_context(
+            user_data_dir=profile_dir,
+            channel="chrome",   # system Chrome for best fingerprint
+            headless=False,
+            args=["--no-first-run", "--no-default-browser-check"],
+            viewport={"width": 1920, "height": 1080},
+        )
+        page = ctx.pages[0] if ctx.pages else ctx.new_page()
+
+        logger.info("Navigating to K-Ruoka...")
+        page.goto(
+            f"{SITE_URL}/kauppa",
+            wait_until="domcontentloaded", timeout=60000,
+        )
+
+        # Wait for auto-resolve or click Turnstile
+        _wait_for_cloudflare_browser(page)
+
+        # Extract cookies
+        cookies_list = ctx.cookies()
+        cookies = {
+            c["name"]: c["value"]
+            for c in cookies_list
+            if "k-ruoka" in c.get("domain", "")
+        }
+        ua = page.evaluate("navigator.userAgent") or ""
+
+        if "cf_clearance" not in cookies:
+            raise RuntimeError(
+                "Browser could not obtain cf_clearance cookie"
+            )
+
+        return cookies, ua
+    finally:
+        try:
+            ctx.close()
+        except Exception:
+            pass
+        try:
+            pw.stop()
+        except Exception:
+            pass
+
+
+def _wait_for_cloudflare_browser(page, timeout: int = 90):
+    """Wait for CF to resolve in browser, trying Turnstile click."""
+    clicked = False
+    for i in range(timeout):
+        try:
+            title = page.title() or ""
+        except Exception:
+            logger.info("Page navigating... waiting for reload")
+            time.sleep(3)
+            try:
+                page.wait_for_load_state("domcontentloaded", timeout=15000)
+            except Exception:
+                pass
+            continue
+
+        if "moment" not in title.lower() and "verif" not in title.lower():
+            logger.info("CF cleared (title: %s)", title)
+            return
+
+        if i == 5:
+            logger.warning("CF challenge detected — attempting auto-click...")
+
+        # Try Turnstile click once at t=5s, again at t=30s
+        if not clicked and i in (5, 30):
+            _try_click_turnstile_browser(page)
+            clicked = i == 30
+
+        time.sleep(1)
+
+    raise RuntimeError(f"CF challenge did not resolve within {timeout}s")
+
+
+def _try_click_turnstile_browser(page):
+    """Attempt to click the Turnstile checkbox in browser."""
+    try:
+        for frame in page.frames:
+            if "challenges.cloudflare.com" not in (frame.url or ""):
+                continue
+            try:
+                body = frame.locator("body")
+                if body.is_visible(timeout=2000):
+                    body.click(position={"x": 28, "y": 28})
+                    logger.info("Clicked Turnstile widget area")
+                    return
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
+# Session teardown
+# ---------------------------------------------------------------------------
+
+def close_browser():
+    """Clean up session resources."""
+    global _session
+    if _session is not None:
+        try:
+            _session.close()
+        except Exception:
+            pass
+        _session = None
+
+
+# ---------------------------------------------------------------------------
+# HTTP transport (uses curl_cffi session with CF cookies)
+# ---------------------------------------------------------------------------
 
 class _FetchResponse:
-    """Minimal response wrapper matching the interface used by validate_api_headers."""
+    """Minimal response wrapper for compatibility."""
+
     def __init__(self, status_code: int, body: str):
         self.status_code = status_code
         self.text = body
@@ -108,62 +473,29 @@ class _FetchResponse:
             raise RuntimeError(f"HTTP {self.status_code}: {self.text[:200]}")
 
 
-def _js_fetch(method: str, url: str, body: dict | None = None) -> _FetchResponse:
-    """Execute a fetch() call from within the browser page context.
-
-    This inherits all Chrome cookies (including cf_clearance) and uses
-    Chrome's authentic TLS fingerprint, bypassing Cloudflare.
-    """
-    page = _get_browser()
-
-    headers_js = json.dumps({
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        **API_HEADERS,
-    })
-
-    if method.upper() == "GET":
-        js = f"""
-        return fetch("{url}", {{
-            method: "GET",
-            headers: {headers_js},
-            credentials: "include"
-        }}).then(async r => ({{
-            status: r.status,
-            body: await r.text()
-        }}));
-        """
-    else:
-        body_js = json.dumps(body or {})
-        js = f"""
-        return fetch("{url}", {{
-            method: "POST",
-            headers: {headers_js},
-            credentials: "include",
-            body: JSON.stringify({body_js})
-        }}).then(async r => ({{
-            status: r.status,
-            body: await r.text()
-        }}));
-        """
-
-    result = page.run_js(js)
-    if result is None:
-        raise RuntimeError(f"fetch() returned None for {method} {url}")
-
-    return _FetchResponse(result["status"], result["body"])
-
-
 def _build_query_string(params: dict) -> str:
     """Build a URL query string from a dict."""
-    from urllib.parse import urlencode
     return urlencode({k: v for k, v in params.items() if v is not None})
+
+
+def _http_request(
+    method: str, url: str, body: dict | None = None,
+) -> _FetchResponse:
+    """Make an HTTP request using the authenticated curl_cffi session."""
+    session = _ensure_session()
+
+    if method.upper() == "GET":
+        resp = session.get(url)
+    else:
+        resp = session.post(url, json=body)
+
+    return _FetchResponse(resp.status_code, resp.text)
 
 
 def _post_raw(endpoint: str, payload: dict) -> _FetchResponse:
     """POST and return a response-like object (for health checks)."""
     url = f"{BASE_URL}/{endpoint}"
-    return _js_fetch("POST", url, payload)
+    return _http_request("POST", url, payload)
 
 
 def _post(endpoint: str, payload: dict) -> dict:
@@ -181,14 +513,17 @@ def _post_with_retry(endpoint: str, payload: dict) -> dict:
             if attempt == MAX_RETRIES:
                 raise
             wait = RETRY_BACKOFF * (attempt + 1)
-            logger.debug("Retry %d for %s, waiting %.1fs", attempt + 1, endpoint, wait)
+            logger.debug(
+                "Retry %d for %s, waiting %.1fs",
+                attempt + 1, endpoint, wait,
+            )
             time.sleep(wait)
 
 
 def _post_with_params(endpoint: str, params: dict) -> dict:
     qs = _build_query_string(params)
     url = f"{BASE_URL}/{endpoint}?{qs}" if qs else f"{BASE_URL}/{endpoint}"
-    resp = _js_fetch("POST", url)
+    resp = _http_request("POST", url)
     resp.raise_for_status()
     return resp.json()
 
@@ -196,10 +531,14 @@ def _post_with_params(endpoint: str, params: dict) -> dict:
 def _get(endpoint: str, params: dict) -> dict:
     qs = _build_query_string(params)
     url = f"{BASE_URL}/{endpoint}?{qs}" if qs else f"{BASE_URL}/{endpoint}"
-    resp = _js_fetch("GET", url)
+    resp = _http_request("GET", url)
     resp.raise_for_status()
     return resp.json()
 
+
+# ---------------------------------------------------------------------------
+# K-Ruoka API endpoint wrappers
+# ---------------------------------------------------------------------------
 
 def fetch_offer_categories(store_id: str) -> dict:
     return _post("offer-categories", {"storeId": store_id})
@@ -347,7 +686,7 @@ def fetch_all_offers_for_category(
 
     while True:
         time.sleep(DELAY_BETWEEN_CALLS)
-        page = _post_with_retry("offer-category", {
+        result = _post_with_retry("offer-category", {
             "storeId": store_id,
             "category": {"kind": "productCategory", "slug": slug},
             "offset": offset,
@@ -357,15 +696,14 @@ def fetch_all_offers_for_category(
         api_calls += 1
 
         if total_hits is None:
-            total_hits = page.get("totalHits", 0)
+            total_hits = result.get("totalHits", 0)
 
-        offers = page.get("offers", [])
+        offers = result.get("offers", [])
         all_offers.extend(offers)
 
         if on_page:
             on_page(slug, offset, len(offers), total_hits)
 
-        # Stop when we have all offers or the page is empty
         if not offers or len(all_offers) >= total_hits:
             break
 
@@ -396,7 +734,7 @@ def fetch_all_offers_for_store(
         totalElapsedSeconds: float
     """
     t0 = time.perf_counter()
-    total_api_calls = 1  # for the categories call
+    total_api_calls = 1
 
     categories_list = fetch_all_categories(store_id)
     time.sleep(DELAY_BETWEEN_CALLS)
@@ -472,7 +810,10 @@ def search_all_offers_for_store(
                 if attempt == MAX_RETRIES:
                     raise
                 wait = RETRY_BACKOFF * (attempt + 1)
-                logger.debug("Retry %d for search_offers, waiting %.1fs", attempt + 1, wait)
+                logger.debug(
+                    "Retry %d for search_offers, waiting %.1fs",
+                    attempt + 1, wait,
+                )
                 time.sleep(wait)
 
         api_calls += 1
@@ -489,7 +830,7 @@ def search_all_offers_for_store(
         if not results or len(all_offers) >= total_hits:
             break
 
-        offset += len(results)  # search-offers uses offset, not page number
+        offset += len(results)
 
     elapsed = time.perf_counter() - t0
     return {
@@ -501,8 +842,54 @@ def search_all_offers_for_store(
     }
 
 
+# ---------------------------------------------------------------------------
+# Helsinki geo-filtering
+# ---------------------------------------------------------------------------
+
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate distance in km between two lat/lon points."""
+    R = 6371
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(math.radians(lat1))
+        * math.cos(math.radians(lat2))
+        * math.sin(dlon / 2) ** 2
+    )
+    return R * 2 * math.asin(math.sqrt(a))
+
+
+def filter_stores_by_distance(
+    stores: list[dict], lat: float, lon: float, max_km: float,
+) -> list[dict]:
+    """Filter stores to those within max_km of the given coordinates."""
+    result = []
+    for store in stores:
+        geo = store.get("geo")
+        if not geo or geo.get("lat") is None or geo.get("lon") is None:
+            continue
+        dist = haversine(lat, lon, geo["lat"], geo["lon"])
+        if dist <= max_km:
+            result.append(store)
+    return result
+
+
+def fetch_helsinki_stores() -> list[dict]:
+    """Fetch all K-Ruoka stores within 50km of Helsinki."""
+    all_stores = fetch_all_stores()
+    filtered = filter_stores_by_distance(
+        all_stores, HELSINKI_LAT, HELSINKI_LON, MAX_DISTANCE_KM,
+    )
+    logger.info(
+        "Helsinki filter: %d/%d stores within %dkm",
+        len(filtered), len(all_stores), MAX_DISTANCE_KM,
+    )
+    return filtered
+
+
 def validate_api_headers() -> dict:
-    """Quick health check that the K-Ruoka API is reachable via the browser.
+    """Quick health check that the K-Ruoka API is reachable.
 
     Returns dict with:
         ok: bool
@@ -515,7 +902,9 @@ def validate_api_headers() -> dict:
 
     # 1. stores/search
     try:
-        resp = _post_raw("stores/search", {"query": "", "offset": 0, "limit": 1})
+        resp = _post_raw(
+            "stores/search", {"query": "", "offset": 0, "limit": 1},
+        )
         statuses["storesStatus"] = resp.status_code
         if resp.status_code != 200:
             errors.append(f"stores/search returned {resp.status_code}")
@@ -527,9 +916,12 @@ def validate_api_headers() -> dict:
 
     # 2. search-offers (primary endpoint)
     try:
-        qs = _build_query_string({"storeId": "N110", "offset": 0, "categoryPath": "juomat", "language": "fi"})
+        qs = _build_query_string({
+            "storeId": "N110", "offset": 0,
+            "categoryPath": "juomat", "language": "fi",
+        })
         url = f"{BASE_URL}/search-offers/?{qs}"
-        resp = _js_fetch("GET", url)
+        resp = _http_request("GET", url)
         statuses["searchOffersStatus"] = resp.status_code
         if resp.status_code != 200:
             errors.append(f"search-offers returned {resp.status_code}")

@@ -1,0 +1,427 @@
+#!/usr/bin/env python3
+"""
+Sync K-Ruoka offers (Helsinki area) to Supabase.
+
+This script is designed to run as a GitHub Actions job. It:
+1. Fetches all K-Ruoka stores within 50km of Helsinki
+2. Upserts stores into the Supabase `stores` table
+3. For each store, fetches all offers via the search-offers API
+4. Maps K-Ruoka offers to the food-vibe schema
+5. Upserts products (by EAN) and offers into Supabase
+6. Deletes stale offers (not seen in this sync run)
+
+Environment variables required:
+    SUPABASE_URL - Supabase project URL
+    SUPABASE_SERVICE_ROLE_KEY - Supabase service role key
+"""
+import os
+import sys
+import time
+import json
+import logging
+import atexit
+from datetime import datetime, timezone
+
+# Add parent directory to path for helpers import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from helpers import (
+    fetch_helsinki_stores,
+    search_all_offers_for_store,
+    close_browser,
+    DELAY_BETWEEN_CALLS,
+)
+from supabase import create_client
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+# Shut down Chrome when the script exits
+atexit.register(close_browser)
+
+SOURCE = "k-ruoka"
+BATCH_SIZE = 50  # Supabase upsert batch size
+
+UNIT_MAP = {
+    "kpl": "pcs", "st": "pcs", "pcs": "pcs",
+    "kg": "kg", "kg1": "kg",
+    "l": "l", "ltr": "l",
+    "g": "g", "gr": "g",
+    "ml": "ml",
+}
+
+
+# ---------------------------------------------------------------------------
+# Mapping helpers
+# ---------------------------------------------------------------------------
+
+def _now_iso() -> str:
+    """Return the current UTC time as an ISO-8601 string."""
+    return datetime.now(timezone.utc).isoformat()
+
+
+def map_store(store_data: dict) -> dict:
+    """Map a K-Ruoka store dict to a Supabase `stores` row."""
+    location = store_data.get("location", {}) or {}
+    geo = store_data.get("geo", {}) or {}
+    return {
+        "id": f"k-ruoka:{store_data['id']}",
+        "remote_id": store_data["id"],
+        "source": SOURCE,
+        "name": store_data["name"],
+        "slug": store_data.get("slug"),
+        "brand": store_data.get("chainName"),
+        "street_address": location.get("address"),
+        "postcode": location.get("postalCode"),
+        "city": location.get("city"),
+        "latitude": geo.get("lat"),
+        "longitude": geo.get("lon"),
+        "is_active": True,
+        "last_seen_at": _now_iso(),
+        "raw_data": store_data,
+    }
+
+
+def map_unit(raw_unit: str | None) -> str | None:
+    """Map a raw unit string (e.g. 'kpl', 'kg') to a standard short code."""
+    if not raw_unit:
+        return None
+    return UNIT_MAP.get(raw_unit.lower().strip())
+
+
+def map_offer(store_id: str, offer: dict) -> tuple[dict, dict | None]:
+    """Map a K-Ruoka offer to an (offer_row, product_row | None) tuple.
+
+    Safely navigates all nested fields — missing keys resolve to None.
+    """
+    offer_id = offer.get("id", "unknown")
+    now = _now_iso()
+
+    # ---- title ----
+    loc_title = offer.get("localizedTitle", {}) or {}
+    title = loc_title.get("finnish") or loc_title.get("english") or "Unknown"
+
+    # ---- top-level pricing ----
+    pricing = offer.get("pricing", {}) or {}
+    price = pricing.get("price")
+
+    normal_pricing = offer.get("normalPricing", {}) or {}
+    normal_price = normal_pricing.get("price")
+
+    # ---- product & mobilescan ----
+    product_wrapper = offer.get("product", {}) or {}
+    product = product_wrapper.get("product", {}) or {}
+    mobilescan = product.get("mobilescan", {}) or {}
+    ms_pricing = mobilescan.get("pricing", {}) or {}
+
+    # ---- unit price / unit (prefer discount, then normal) ----
+    unit_price = None
+    unit = None
+
+    discount_up = (ms_pricing.get("discount", {}) or {}).get("unitPrice", {}) or {}
+    normal_up = (ms_pricing.get("normal", {}) or {}).get("unitPrice", {}) or {}
+
+    if discount_up.get("value") is not None:
+        unit_price = discount_up["value"]
+        unit = map_unit(discount_up.get("unit"))
+    elif normal_up.get("value") is not None:
+        unit_price = normal_up["value"]
+        unit = map_unit(normal_up.get("unit"))
+
+    # ---- EAN ----
+    ean = product.get("ean") or product_wrapper.get("id")
+    # Normalise — EAN should be a string of digits
+    if ean is not None:
+        ean = str(ean).strip()
+        if not ean:
+            ean = None
+
+    # ---- image URL ----
+    images = product.get("images") or []
+    image_url = images[0] if images else offer.get("image")
+
+    # ---- source URL ----
+    source_url = f"https://www.k-ruoka.fi/kauppa/tuote/{ean}" if ean else None
+
+    # ---- validity dates from mobilescan discount ----
+    discount_info = (ms_pricing.get("discount", {}) or {})
+    valid_from = discount_info.get("startDate")
+    valid_to = discount_info.get("endDate")
+
+    # ---- categories ----
+    raw_categories = None
+    tree = (product.get("category", {}) or {}).get("tree")
+    if tree and isinstance(tree, list):
+        raw_categories = [
+            {
+                "name": (entry.get("localizedName", {}) or {}).get("finnish", ""),
+                "slug": entry.get("slug", ""),
+            }
+            for entry in tree
+        ]
+
+    # ---- batch / quantity_required ----
+    batch = ms_pricing.get("batch", {}) or {}
+    quantity_required = batch.get("amount", 1) if batch.get("amount") else 1
+
+    offer_row = {
+        "id": f"k-ruoka:{store_id}:{offer_id}",
+        "store_id": f"k-ruoka:{store_id}",
+        "title": title,
+        "price": price,
+        "unit_price": unit_price,
+        "unit": unit,
+        "normal_price": normal_price,
+        "quantity_required": quantity_required,
+        "source_url": source_url,
+        "image_url": image_url,
+        "raw_categories": raw_categories,
+        "valid_from": valid_from,
+        "valid_to": valid_to,
+        "updated_at": now,
+        # canonical_product_id is set later after product upsert
+    }
+
+    # ---- product row (skip internal EANs starting with '2') ----
+    product_row = None
+    if ean and not ean.startswith("2"):
+        product_row = {
+            "ean": ean,
+            "name": title,
+            "image_url": image_url,
+        }
+
+    return offer_row, product_row
+
+
+# ---------------------------------------------------------------------------
+# Supabase helpers
+# ---------------------------------------------------------------------------
+
+def _chunked(lst: list, size: int):
+    """Yield successive chunks of *size* from *lst*."""
+    for i in range(0, len(lst), size):
+        yield lst[i : i + size]
+
+
+def upsert_stores(supabase, stores: list[dict]) -> None:
+    """Upsert store rows into Supabase in batches."""
+    rows = [map_store(s) for s in stores]
+    for batch in _chunked(rows, BATCH_SIZE):
+        supabase.table("stores").upsert(batch, on_conflict="id").execute()
+    logger.info("Upserted %d stores", len(rows))
+
+
+def _upsert_products(supabase, product_rows: list[dict]) -> None:
+    """Upsert product rows (deduplicated by EAN) in batches."""
+    if not product_rows:
+        return
+    for batch in _chunked(product_rows, BATCH_SIZE):
+        supabase.table("products").upsert(batch, on_conflict="ean").execute()
+
+
+def _fetch_product_ids(supabase, eans: list[str]) -> dict[str, str]:
+    """Return a mapping of EAN → product UUID from the products table."""
+    if not eans:
+        return {}
+    ean_to_id: dict[str, str] = {}
+    for batch in _chunked(eans, BATCH_SIZE):
+        resp = (
+            supabase.table("products")
+            .select("id, ean")
+            .in_("ean", batch)
+            .execute()
+        )
+        for row in resp.data or []:
+            ean_to_id[row["ean"]] = row["id"]
+    return ean_to_id
+
+
+def _upsert_offers(supabase, offer_rows: list[dict]) -> None:
+    """Upsert offer rows in batches."""
+    if not offer_rows:
+        return
+    for batch in _chunked(offer_rows, BATCH_SIZE):
+        supabase.table("offers").upsert(batch, on_conflict="id").execute()
+
+
+def _delete_stale_offers(supabase, store_db_id: str, sync_time: str) -> int:
+    """Delete offers for *store_db_id* whose updated_at is older than *sync_time*.
+
+    Returns the count of deleted rows.
+    """
+    resp = (
+        supabase.table("offers")
+        .delete()
+        .eq("store_id", store_db_id)
+        .lt("updated_at", sync_time)
+        .execute()
+    )
+    return len(resp.data) if resp.data else 0
+
+
+# ---------------------------------------------------------------------------
+# Per-store sync
+# ---------------------------------------------------------------------------
+
+def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
+    """Fetch and sync all offers for a single store.
+
+    Args:
+        supabase: Supabase client instance.
+        store_id: K-Ruoka store ID (e.g. "N110").
+        sync_time: ISO timestamp marking the start of this sync run.
+
+    Returns:
+        Number of offers synced for this store.
+    """
+    # 1. Fetch all offers from K-Ruoka
+    result = search_all_offers_for_store(store_id)
+    offers_raw = result.get("offers", [])
+    logger.info(
+        "Store %s: fetched %d offers in %.1fs (%d API calls)",
+        store_id,
+        len(offers_raw),
+        result.get("elapsedSeconds", 0),
+        result.get("apiCalls", 0),
+    )
+
+    if not offers_raw:
+        # No offers — still delete stale ones
+        deleted = _delete_stale_offers(supabase, f"k-ruoka:{store_id}", sync_time)
+        if deleted:
+            logger.info("Store %s: deleted %d stale offers", store_id, deleted)
+        return 0
+
+    # 2. Map offers
+    offer_rows: list[dict] = []
+    product_rows_map: dict[str, dict] = {}  # deduplicate by EAN
+
+    for raw_offer in offers_raw:
+        try:
+            offer_row, product_row = map_offer(store_id, raw_offer)
+            offer_rows.append(offer_row)
+            if product_row and product_row["ean"] not in product_rows_map:
+                product_rows_map[product_row["ean"]] = product_row
+        except Exception:
+            logger.warning(
+                "Store %s: failed to map offer %s, skipping",
+                store_id,
+                raw_offer.get("id", "?"),
+                exc_info=True,
+            )
+
+    # 3. Upsert products
+    product_rows = list(product_rows_map.values())
+    if product_rows:
+        _upsert_products(supabase, product_rows)
+        logger.info("Store %s: upserted %d products", store_id, len(product_rows))
+
+    # 4. Fetch product UUIDs and attach to offers
+    eans = list(product_rows_map.keys())
+    ean_to_id = _fetch_product_ids(supabase, eans)
+    for row in offer_rows:
+        # Derive EAN from the offer source_url or from the original map
+        # The source_url pattern is https://www.k-ruoka.fi/kauppa/tuote/{ean}
+        ean = None
+        if row.get("source_url"):
+            ean = row["source_url"].rsplit("/", 1)[-1]
+        if ean and ean in ean_to_id:
+            row["canonical_product_id"] = ean_to_id[ean]
+        else:
+            row["canonical_product_id"] = None
+
+    # 5. Upsert offers
+    _upsert_offers(supabase, offer_rows)
+    logger.info("Store %s: upserted %d offers", store_id, len(offer_rows))
+
+    # 6. Delete stale offers
+    deleted = _delete_stale_offers(supabase, f"k-ruoka:{store_id}", sync_time)
+    if deleted:
+        logger.info("Store %s: deleted %d stale offers", store_id, deleted)
+
+    return len(offer_rows)
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main() -> None:
+    """Entry point — sync Helsinki-area K-Ruoka stores and offers to Supabase."""
+
+    # ---- validate env ----
+    supabase_url = os.environ.get("SUPABASE_URL")
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    if not supabase_url or not supabase_key:
+        logger.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set")
+        sys.exit(1)
+
+    supabase = create_client(supabase_url, supabase_key)
+    logger.info("Supabase client initialised (%s)", supabase_url)
+
+    t_start = time.perf_counter()
+    sync_time = _now_iso()
+
+    # ---- 1. Fetch stores ----
+    logger.info("Fetching Helsinki-area K-Ruoka stores…")
+    stores = fetch_helsinki_stores()
+    logger.info("Found %d stores", len(stores))
+
+    if not stores:
+        logger.warning("No stores found — exiting")
+        sys.exit(0)
+
+    # ---- 2. Upsert stores ----
+    upsert_stores(supabase, stores)
+
+    # ---- 3. Sync offers for each store ----
+    total_offers = 0
+    errors: list[str] = []
+
+    for idx, store in enumerate(stores, 1):
+        sid = store["id"]
+        logger.info(
+            "--- [%d/%d] Syncing store %s (%s) ---",
+            idx,
+            len(stores),
+            sid,
+            store.get("name", ""),
+        )
+        try:
+            count = sync_store_offers(supabase, sid, sync_time)
+            total_offers += count
+        except Exception:
+            logger.error("Store %s FAILED", sid, exc_info=True)
+            errors.append(sid)
+
+        # Be polite between stores
+        if idx < len(stores):
+            time.sleep(DELAY_BETWEEN_CALLS)
+
+    # ---- 4. Summary ----
+    elapsed = time.perf_counter() - t_start
+    logger.info("=" * 60)
+    logger.info("Sync complete")
+    logger.info("  Stores synced : %d", len(stores))
+    logger.info("  Total offers  : %d", total_offers)
+    logger.info("  Errors        : %d  %s", len(errors), errors if errors else "")
+    logger.info("  Elapsed       : %.1f s (%.1f min)", elapsed, elapsed / 60)
+    logger.info("=" * 60)
+
+    # Fail the GH Actions job if too many stores errored out (> 25%)
+    if errors and len(errors) > len(stores) * 0.25:
+        logger.error(
+            "Too many errors (%d/%d stores failed) — exiting with code 1",
+            len(errors),
+            len(stores),
+        )
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,16 +1,14 @@
 """
-Full sweep: use search-offers to get total offer count for ALL stores.
+Full sweep: use search-offers to get total offer count for stores.
 
-Instead of fetching categories per store (which requires the offer-categories
-endpoint), we use search_offers(store_id, "") which returns totalHits for the
-entire store in a single call. This is faster and uses fewer API calls.
-
-API calls needed: 1 (all stores) + 1 per store = ~1,061 total
-Expected runtime: ~9-12 minutes (with 0.5s delay between calls)
+By default, only stores within 50km of Helsinki are included (--helsinki flag).
+Use --all to scan all 1,060+ stores instead.
 
 Usage:
-    python scripts/full_sweep.py            # all stores
-    python scripts/full_sweep.py 100        # first 100 stores (quick test)
+    python scripts/full_sweep.py                # Helsinki-area stores only
+    python scripts/full_sweep.py --all          # all stores
+    python scripts/full_sweep.py --all 100      # first 100 of all stores
+    python scripts/full_sweep.py 50             # first 50 Helsinki-area stores
 """
 import sys
 import json
@@ -24,16 +22,23 @@ from collections import Counter
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from helpers import (
     fetch_all_stores,
+    fetch_helsinki_stores,
     search_offers,
     close_browser,
     DELAY_BETWEEN_CALLS,
     SEARCH_OFFERS_PAGE_SIZE,
+    HELSINKI_LAT,
+    HELSINKI_LON,
+    MAX_DISTANCE_KM,
 )
 
 # Shut down Chrome when the script exits
 atexit.register(close_browser)
 
-MAX_STORES = int(sys.argv[1]) if len(sys.argv) > 1 else None
+# Parse args: --all flag and optional max-stores number
+USE_HELSINKI_FILTER = "--all" not in sys.argv
+args_numbers = [a for a in sys.argv[1:] if a != "--all" and a.lstrip("-").isdigit()]
+MAX_STORES = int(args_numbers[0]) if args_numbers else None
 PAGE_SIZE = SEARCH_OFFERS_PAGE_SIZE  # 48
 
 # ---------------------------------------------------------------------------
@@ -82,10 +87,15 @@ def print_histogram(values: list, label: str, bins: list[tuple[int, int]]):
 def main():
     t0_total = time.perf_counter()
 
-    # ---- 1. Fetch all stores ----
-    print("Fetching all stores...")
-    stores = fetch_all_stores()
-    print(f"  → {len(stores)} stores\n")
+    # ---- 1. Fetch stores ----
+    if USE_HELSINKI_FILTER:
+        print(f"Fetching stores within {MAX_DISTANCE_KM}km of Helsinki ({HELSINKI_LAT}, {HELSINKI_LON})...")
+        stores = fetch_helsinki_stores()
+        print(f"  → {len(stores)} stores in Helsinki area\n")
+    else:
+        print("Fetching all stores...")
+        stores = fetch_all_stores()
+        print(f"  → {len(stores)} stores\n")
 
     if MAX_STORES:
         stores = stores[:MAX_STORES]

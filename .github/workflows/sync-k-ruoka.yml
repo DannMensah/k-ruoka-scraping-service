@@ -1,0 +1,92 @@
+name: Sync K-Ruoka to Supabase
+
+on:
+  # Triggered by Vercel cron via GitHub API
+  repository_dispatch:
+    types: [sync-k-ruoka]
+
+  # Manual trigger from GitHub UI / CLI
+  workflow_dispatch:
+
+  # Backup schedule — every 4 hours
+  schedule:
+    - cron: '0 2,6,10,14,18,22 * * *'
+
+concurrency:
+  group: k-ruoka-sync
+  cancel-in-progress: false  # let running syncs finish
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    # FlareSolverr runs as a sidecar Docker service on port 8191
+    services:
+      flaresolverr:
+        image: ghcr.io/flaresolverr/flaresolverr:latest
+        ports:
+          - 8191:8191
+        env:
+          LOG_LEVEL: info
+          TZ: Europe/Helsinki
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # FlareSolverr (primary CF bypass — free)
+      FLARESOLVERR_URL: http://localhost:8191/v1
+      # 2Captcha (fallback CF bypass — optional, cheap)
+      CAPTCHA_API_KEY: ${{ secrets.CAPTCHA_API_KEY }}
+      # Xvfb for Patchright browser fallback
+      DISPLAY: ':99'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Patchright browsers (fallback)
+        run: patchright install chromium
+
+      - name: Start Xvfb (virtual framebuffer for browser fallback)
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 &
+          sleep 2
+
+      - name: Wait for FlareSolverr to be ready
+        run: |
+          echo "Waiting for FlareSolverr..."
+          for i in $(seq 1 30); do
+            if curl -s http://localhost:8191/v1 -o /dev/null -w '%{http_code}' | grep -q '200\|405'; then
+              echo "FlareSolverr is ready!"
+              break
+            fi
+            echo "  attempt $i/30..."
+            sleep 2
+          done
+
+      - name: Restore Chrome profile cache
+        uses: actions/cache@v4
+        with:
+          path: .chrome-profile
+          key: chrome-profile-${{ github.run_id }}
+          restore-keys: |
+            chrome-profile-
+
+      - name: Run sync
+        run: python sync_to_supabase.py
+
+      - name: Save Chrome profile cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .chrome-profile
+          key: chrome-profile-${{ github.run_id }}
