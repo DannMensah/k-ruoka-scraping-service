@@ -29,7 +29,7 @@ API_HEADERS = {
 # API constraints discovered via benchmarking
 MAX_OFFER_CATEGORY_LIMIT = 25  # API returns 400 for anything above 25
 SEARCH_OFFERS_PAGE_SIZE = 48   # search-offers returns up to 48 per page
-DELAY_BETWEEN_CALLS = 0.5      # seconds between API calls to avoid rate-limiting
+DELAY_BETWEEN_CALLS = 0.15     # seconds between API calls to avoid rate-limiting
 MAX_RETRIES = 2
 RETRY_BACKOFF = 1.5             # seconds, multiplied by attempt number
 
@@ -831,6 +831,15 @@ def search_all_offers_for_store(
             break
 
         offset += len(results)
+
+        # K-Ruoka API rejects offset > 1000 — stop and return what we have
+        if offset > 1000:
+            logger.warning(
+                "Store %s: offset %d exceeds API limit (1000); "
+                "truncating at %d/%d offers",
+                store_id, offset, len(all_offers), total_hits,
+            )
+            break
 
     elapsed = time.perf_counter() - t0
     return {

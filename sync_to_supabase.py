@@ -29,7 +29,6 @@ from helpers import (
     fetch_helsinki_stores,
     search_all_offers_for_store,
     close_browser,
-    DELAY_BETWEEN_CALLS,
 )
 from supabase import create_client
 
@@ -44,7 +43,7 @@ logger = logging.getLogger(__name__)
 atexit.register(close_browser)
 
 SOURCE = "k-ruoka"
-BATCH_SIZE = 50  # Supabase upsert batch size
+BATCH_SIZE = 500  # Supabase upsert batch size
 
 UNIT_MAP = {
     "kpl": "pcs", "st": "pcs", "pcs": "pcs",
@@ -392,13 +391,6 @@ def main() -> None:
     stores = fetch_helsinki_stores()
     logger.info("Found %d stores", len(stores))
 
-    if stores:
-        s0 = stores[0]
-        logger.info(
-            "Sample store: id=%s name=%s geo=%s",
-            s0.get("id"), s0.get("name"), s0.get("geo"),
-        )
-
     if not stores:
         logger.warning("No stores found — exiting")
         sys.exit(0)
@@ -426,9 +418,7 @@ def main() -> None:
             logger.error("Store %s FAILED", sid, exc_info=True)
             errors.append(sid)
 
-        # Be polite between stores
-        if idx < len(stores):
-            time.sleep(DELAY_BETWEEN_CALLS)
+
 
     # ---- 4. Summary ----
     elapsed = time.perf_counter() - t_start
