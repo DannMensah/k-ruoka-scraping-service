@@ -8,17 +8,9 @@ on:
   # Manual trigger from GitHub UI / CLI
   workflow_dispatch:
 
-  # Trigger on push to main (temporary — remove after verified)
-  push:
-    branches: [main]
-
-  # Backup schedule — every 4 hours
-  schedule:
-    - cron: '0 2,6,10,14,18,22 * * *'
-
 concurrency:
   group: k-ruoka-sync
-  cancel-in-progress: true  # new push cancels any running sync
+  cancel-in-progress: true # new push cancels any running sync
 
 jobs:
   sync:
@@ -43,7 +35,7 @@ jobs:
       # 2Captcha (fallback CF bypass — optional, cheap)
       CAPTCHA_API_KEY: ${{ secrets.CAPTCHA_API_KEY }}
       # Xvfb for Patchright browser fallback
-      DISPLAY: ':99'
+      DISPLAY: ":99"
 
     steps:
       - name: Checkout code
@@ -52,7 +44,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install Python dependencies
         run: pip install -r requirements.txt

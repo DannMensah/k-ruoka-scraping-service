@@ -6,12 +6,12 @@ Refactor the K-Ruoka scraping service to run as a **GitHub Actions workflow** (n
 
 ### Key Numbers (estimated after Helsinki filter)
 
-| Metric | Estimate |
-|---|---|
-| Stores (Helsinki 50km) | ~100–150 (vs 1,060 total) |
-| Offers | ~30,000–60,000 (vs 344,203 total) |
-| Time per sync | ~15–40 min (single sequential job) |
-| GitHub Actions minutes/month | Unlimited (public repo) |
+| Metric                       | Estimate                           |
+| ---------------------------- | ---------------------------------- |
+| Stores (Helsinki 50km)       | ~100–150 (vs 1,060 total)          |
+| Offers                       | ~30,000–60,000 (vs 344,203 total)  |
+| Time per sync                | ~15–40 min (single sequential job) |
+| GitHub Actions minutes/month | Unlimited (public repo)            |
 
 ---
 
@@ -67,11 +67,13 @@ Refactor the K-Ruoka scraping service to run as a **GitHub Actions workflow** (n
 ### 2.1 Create `.github/workflows/sync-k-ruoka.yml`
 
 Triggers:
+
 - `repository_dispatch` (type: `sync-k-ruoka`) — triggered by Vercel cron
 - `workflow_dispatch` — manual trigger
 - `schedule` — every 4 hours as backup (`0 2,6,10,14,18,22 * * *`)
 
 Job steps:
+
 1. Checkout code
 2. Set up Python 3.12
 3. Install Patchright + browsers (`patchright install chromium`)
@@ -119,18 +121,23 @@ Timeout: 120 minutes
 ## Phase 4 — Testing & Verification
 
 ### 4.1 Local test: Run modified `full_sweep.py` with Helsinki filter
+
 - Verify store count (~100–150), offer distribution, estimated time
 
 ### 4.2 Local test: Run `sync_to_supabase.py` for a small subset
+
 - Set env vars, run for 3 stores, verify Supabase data
 
 ### 4.3 GitHub Actions test
+
 - Push code, trigger `workflow_dispatch`, monitor job logs
 
 ### 4.4 Food-Vibe build/lint
+
 - `npm run lint` and `npm run build` must pass
 
 ### 4.5 Integration test
+
 - Verify K-Ruoka offers appear in discounts page
 
 ---
@@ -139,49 +146,49 @@ Timeout: 120 minutes
 
 ### Stores
 
-| Food-Vibe Column | K-Ruoka Source |
-|---|---|
-| `id` | `k-ruoka:{store.id}` |
-| `remote_id` | `store.id` (e.g., `"N110"`) |
-| `source` | `"k-ruoka"` |
-| `name` | `store.name` |
-| `slug` | `store.slug` |
-| `brand` | `store.chainName` |
-| `street_address` | `store.location.address` |
-| `postcode` | `store.location.postalCode` |
-| `city` | `store.location.city` |
-| `latitude` | `store.geo.lat` |
-| `longitude` | `store.geo.lon` |
-| `is_active` | `True` |
-| `last_seen_at` | `now()` |
-| `raw_data` | Full store JSON |
+| Food-Vibe Column | K-Ruoka Source              |
+| ---------------- | --------------------------- |
+| `id`             | `k-ruoka:{store.id}`        |
+| `remote_id`      | `store.id` (e.g., `"N110"`) |
+| `source`         | `"k-ruoka"`                 |
+| `name`           | `store.name`                |
+| `slug`           | `store.slug`                |
+| `brand`          | `store.chainName`           |
+| `street_address` | `store.location.address`    |
+| `postcode`       | `store.location.postalCode` |
+| `city`           | `store.location.city`       |
+| `latitude`       | `store.geo.lat`             |
+| `longitude`      | `store.geo.lon`             |
+| `is_active`      | `True`                      |
+| `last_seen_at`   | `now()`                     |
+| `raw_data`       | Full store JSON             |
 
 ### Offers
 
-| Food-Vibe Column | K-Ruoka Source |
-|---|---|
-| `id` | `k-ruoka:{storeId}:{offer.id}` |
-| `store_id` | `k-ruoka:{storeId}` |
-| `title` | `offer.localizedTitle.finnish` (fallback: english) |
-| `price` | `offer.pricing.price` |
-| `normal_price` | `offer.normalPricing.price` |
-| `unit_price` | `mobilescan.pricing.discount.unitPrice.value` or `normal.unitPrice.value` |
-| `unit` | Unit from mobilescan pricing |
-| `ean` | `offer.product.product.ean` |
-| `image_url` | `offer.product.product.images[0]` or `offer.image` |
-| `source_url` | `https://www.k-ruoka.fi/kauppa/tuote/{ean}` |
-| `valid_from` | `mobilescan.pricing.discount.startDate` |
-| `valid_to` | `mobilescan.pricing.discount.endDate` |
-| `raw_categories` | Mapped from `product.category.tree` |
-| `quantity_required` | `mobilescan.pricing.batch.amount` or `1` |
+| Food-Vibe Column    | K-Ruoka Source                                                            |
+| ------------------- | ------------------------------------------------------------------------- |
+| `id`                | `k-ruoka:{storeId}:{offer.id}`                                            |
+| `store_id`          | `k-ruoka:{storeId}`                                                       |
+| `title`             | `offer.localizedTitle.finnish` (fallback: english)                        |
+| `price`             | `offer.pricing.price`                                                     |
+| `normal_price`      | `offer.normalPricing.price`                                               |
+| `unit_price`        | `mobilescan.pricing.discount.unitPrice.value` or `normal.unitPrice.value` |
+| `unit`              | Unit from mobilescan pricing                                              |
+| `ean`               | `offer.product.product.ean`                                               |
+| `image_url`         | `offer.product.product.images[0]` or `offer.image`                        |
+| `source_url`        | `https://www.k-ruoka.fi/kauppa/tuote/{ean}`                               |
+| `valid_from`        | `mobilescan.pricing.discount.startDate`                                   |
+| `valid_to`          | `mobilescan.pricing.discount.endDate`                                     |
+| `raw_categories`    | Mapped from `product.category.tree`                                       |
+| `quantity_required` | `mobilescan.pricing.batch.amount` or `1`                                  |
 
 ### Products
 
-| Food-Vibe Column | K-Ruoka Source |
-|---|---|
-| `ean` | `offer.product.product.ean` |
-| `name` | `offer.localizedTitle.finnish` |
-| `image_url` | `offer.product.product.images[0]` |
+| Food-Vibe Column | K-Ruoka Source                    |
+| ---------------- | --------------------------------- |
+| `ean`            | `offer.product.product.ean`       |
+| `name`           | `offer.localizedTitle.finnish`    |
+| `image_url`      | `offer.product.product.images[0]` |
 
 ---
 
