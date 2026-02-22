@@ -164,7 +164,14 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict, dict | None]:
     image_url = images[0] if images else offer.get("image")
 
     # ---- source URL ----
-    source_url = f"https://www.k-ruoka.fi/kauppa/tuote/{ean}" if ean else None
+    # Prefer the canonical urlSlug from productAttributes (e.g. "lajitelma-40240580")
+    url_slug = (product.get("productAttributes", {}) or {}).get("urlSlug")
+    if url_slug:
+        source_url = f"https://www.k-ruoka.fi/kauppa/tuote/{url_slug}"
+    elif ean:
+        source_url = f"https://www.k-ruoka.fi/kauppa/tuotehaku?haku={ean}"
+    else:
+        source_url = None
 
     # ---- validity dates from mobilescan discount ----
     discount_info = (ms_pricing.get("discount", {}) or {})
@@ -324,13 +331,16 @@ def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
     # 2. Map offers
     offer_rows: list[dict] = []
     product_rows_map: dict[str, dict] = {}  # deduplicate by EAN
+    offer_ean_map: dict[str, str] = {}  # offer_id → EAN (for canonical_product_id lookup)
 
     for raw_offer in offers_raw:
         try:
             offer_row, product_row = map_offer(store_id, raw_offer)
             offer_rows.append(offer_row)
-            if product_row and product_row["ean"] not in product_rows_map:
-                product_rows_map[product_row["ean"]] = product_row
+            if product_row:
+                offer_ean_map[offer_row["id"]] = product_row["ean"]
+                if product_row["ean"] not in product_rows_map:
+                    product_rows_map[product_row["ean"]] = product_row
         except Exception:
             logger.warning(
                 "Store %s: failed to map offer %s, skipping",
@@ -349,11 +359,7 @@ def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
     eans = list(product_rows_map.keys())
     ean_to_id = _fetch_product_ids(supabase, eans)
     for row in offer_rows:
-        # Derive EAN from the offer source_url or from the original map
-        # The source_url pattern is https://www.k-ruoka.fi/kauppa/tuote/{ean}
-        ean = None
-        if row.get("source_url"):
-            ean = row["source_url"].rsplit("/", 1)[-1]
+        ean = offer_ean_map.get(row["id"])
         if ean and ean in ean_to_id:
             row["canonical_product_id"] = ean_to_id[ean]
         else:
