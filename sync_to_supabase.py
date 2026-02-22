@@ -261,10 +261,15 @@ def _fetch_product_ids(supabase, eans: list[str]) -> dict[str, str]:
 
 
 def _upsert_offers(supabase, offer_rows: list[dict]) -> None:
-    """Upsert offer rows in batches."""
+    """Upsert offer rows in batches (deduplicated by id within each batch)."""
     if not offer_rows:
         return
-    for batch in _chunked(offer_rows, BATCH_SIZE):
+    # Deduplicate — keep last occurrence of each id
+    seen: dict[str, dict] = {}
+    for row in offer_rows:
+        seen[row["id"]] = row
+    deduped = list(seen.values())
+    for batch in _chunked(deduped, BATCH_SIZE):
         supabase.table("offers").upsert(batch, on_conflict="id").execute()
 
 

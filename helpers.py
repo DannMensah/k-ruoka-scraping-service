@@ -15,6 +15,8 @@ import json
 import logging
 import math
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlencode
 
 logger = logging.getLogger(__name__)
@@ -29,9 +31,10 @@ API_HEADERS = {
 # API constraints discovered via benchmarking
 MAX_OFFER_CATEGORY_LIMIT = 25  # API returns 400 for anything above 25
 SEARCH_OFFERS_PAGE_SIZE = 48   # search-offers returns up to 48 per page
-DELAY_BETWEEN_CALLS = 0.15     # seconds between API calls to avoid rate-limiting
+DELAY_BETWEEN_CALLS = 0.1       # seconds between API calls to avoid rate-limiting
 MAX_RETRIES = 2
 RETRY_BACKOFF = 1.5             # seconds, multiplied by attempt number
+PARALLEL_CATEGORIES = 4         # concurrent category fetches per store
 
 # Helsinki geo-filtering
 HELSINKI_LAT = 60.1699
@@ -43,38 +46,70 @@ MAX_DISTANCE_KM = 50
 # CF bypass session management
 # ---------------------------------------------------------------------------
 
-_session = None  # curl_cffi Session with CF cookies
+_cf_cookies: dict[str, str] = {}  # shared CF cookies (read-only after init)
+_cf_user_agent: str = ""
+_init_lock = threading.Lock()  # one-time initialisation guard
+_initialised = False
+_thread_local = threading.local()  # per-thread curl_cffi sessions
 
 
 def _ensure_session():
-    """Get or create an authenticated curl_cffi session with CF cookies."""
-    global _session
-    if _session is not None:
-        return _session
+    """Get or create an authenticated curl_cffi session for the current thread.
 
-    from curl_cffi.requests import Session
+    The first call resolves Cloudflare (inside a lock).  Subsequent calls
+    (including from worker threads) create a lightweight per-thread session
+    that shares the same cookies, enabling true parallel HTTP requests.
+    """
+    global _cf_cookies, _cf_user_agent, _initialised
 
-    cookies, user_agent = _resolve_cloudflare()
+    # One-time CF resolution
+    if not _initialised:
+        with _init_lock:
+            if not _initialised:
+                from curl_cffi.requests import Session as _Sess
 
-    _session = Session(impersonate="chrome")
-    _session.headers.update({
-        "User-Agent": user_agent,
+                cookies, user_agent = _resolve_cloudflare()
+                _cf_cookies = cookies
+                _cf_user_agent = user_agent
+
+                # Create the first session and verify it works
+                s = _Sess(impersonate="chrome")
+                s.headers.update({
+                    "User-Agent": _cf_user_agent,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    **API_HEADERS,
+                })
+                for name, value in _cf_cookies.items():
+                    s.cookies.set(name, value, domain=".k-ruoka.fi")
+
+                _thread_local.session = s
+                _verify_session(s)
+                _initialised = True
+
+    # Per-thread session (lazily created)
+    s = getattr(_thread_local, "session", None)
+    if s is not None:
+        return s
+
+    from curl_cffi.requests import Session as _Sess
+
+    s = _Sess(impersonate="chrome")
+    s.headers.update({
+        "User-Agent": _cf_user_agent,
         "Accept": "application/json",
         "Content-Type": "application/json",
         **API_HEADERS,
     })
-    for name, value in cookies.items():
-        _session.cookies.set(name, value, domain=".k-ruoka.fi")
-
-    # Verify the session works
-    _verify_session()
-    return _session
+    for name, value in _cf_cookies.items():
+        s.cookies.set(name, value, domain=".k-ruoka.fi")
+    _thread_local.session = s
+    return s
 
 
-def _verify_session():
+def _verify_session(session):
     """Quick smoke-test that the session can reach K-Ruoka API."""
-    global _session
-    resp = _session.post(
+    resp = session.post(
         f"{BASE_URL}/stores/search",
         json={"query": "", "offset": 0, "limit": 1},
     )
@@ -445,13 +480,15 @@ def _try_click_turnstile_browser(page):
 
 def close_browser():
     """Clean up session resources."""
-    global _session
-    if _session is not None:
+    global _initialised
+    s = getattr(_thread_local, "session", None)
+    if s is not None:
         try:
-            _session.close()
+            s.close()
         except Exception:
             pass
-        _session = None
+        _thread_local.session = None
+    _initialised = False
 
 
 # ---------------------------------------------------------------------------
@@ -481,7 +518,7 @@ def _build_query_string(params: dict) -> str:
 def _http_request(
     method: str, url: str, body: dict | None = None,
 ) -> _FetchResponse:
-    """Make an HTTP request using the authenticated curl_cffi session."""
+    """Make an HTTP request using the per-thread curl_cffi session."""
     session = _ensure_session()
 
     if method.upper() == "GET":
@@ -771,16 +808,21 @@ def search_all_offers_for_store(
     category_path: str = "",
     on_page: callable = None,
 ) -> dict:
-    """Fetch ALL offers for a store using the search-offers endpoint.
+    """Fetch ALL offers for a store via category-based parallel fetching.
 
-    Uses the search_offers() (GET) endpoint which returns up to 48 results
-    per page and supports empty categoryPath for all offers. This is more
-    efficient than the category-by-category approach.
+    Strategy:
+      1. GET offer-categories → list of category slugs
+      2. For each category, paginate offer-category (limit 25) to get all offers
+      3. Fetch categories in parallel (PARALLEL_CATEGORIES threads)
+      4. Deduplicate offers by offer ID (same offer can appear in multiple categories)
+
+    This avoids the search-offers offset-1000 hard limit and is significantly
+    faster than sequential fetching thanks to parallelism.
 
     Args:
         store_id: Store identifier (e.g., "N110")
-        category_path: Optional category filter (empty = all offers)
-        on_page: Callback(offset, page_count, total_hits) per page
+        category_path: Ignored (kept for API compatibility)
+        on_page: Callback(offset, page_count, total_hits) per page (called per category)
 
     Returns dict with keys:
         storeId: str
@@ -791,61 +833,51 @@ def search_all_offers_for_store(
     """
     t0 = time.perf_counter()
     api_calls = 0
-    all_offers: list[dict] = []
-    offset = 0
-    total_hits = None
 
-    while True:
-        time.sleep(DELAY_BETWEEN_CALLS)
+    # 1. Fetch categories
+    categories = fetch_all_categories(store_id)
+    api_calls += 1
+    slugs = [c.get("slug", "") for c in categories if c.get("slug")]
 
-        for attempt in range(MAX_RETRIES + 1):
+    if not slugs:
+        logger.warning("Store %s: no offer categories found", store_id)
+        return {
+            "storeId": store_id,
+            "totalHits": 0,
+            "offers": [],
+            "apiCalls": api_calls,
+            "elapsedSeconds": round(time.perf_counter() - t0, 3),
+        }
+
+    # 2. Fetch all offers per category in parallel
+    all_offers_by_id: dict[str, dict] = {}  # deduplicate by offer ID
+
+    def _fetch_category(slug: str) -> dict:
+        return fetch_all_offers_for_category(store_id, slug)
+
+    with ThreadPoolExecutor(max_workers=PARALLEL_CATEGORIES) as pool:
+        futures = {pool.submit(_fetch_category, s): s for s in slugs}
+        for future in as_completed(futures):
+            slug = futures[future]
             try:
-                resp = search_offers(
-                    store_id=store_id,
-                    category_path=category_path,
-                    offset=offset,
-                )
-                break
+                result = future.result()
+                api_calls += result["apiCalls"]
+                for offer in result["offers"]:
+                    oid = offer.get("id", "")
+                    if oid and oid not in all_offers_by_id:
+                        all_offers_by_id[oid] = offer
             except Exception:
-                if attempt == MAX_RETRIES:
-                    raise
-                wait = RETRY_BACKOFF * (attempt + 1)
-                logger.debug(
-                    "Retry %d for search_offers, waiting %.1fs",
-                    attempt + 1, wait,
+                logger.warning(
+                    "Store %s: category '%s' failed, skipping",
+                    store_id, slug, exc_info=True,
                 )
-                time.sleep(wait)
 
-        api_calls += 1
-
-        if total_hits is None:
-            total_hits = resp.get("totalHits", 0)
-
-        results = resp.get("results", [])
-        all_offers.extend(results)
-
-        if on_page:
-            on_page(offset, len(results), total_hits)
-
-        if not results or len(all_offers) >= total_hits:
-            break
-
-        offset += len(results)
-
-        # K-Ruoka API rejects offset > 1000 — stop and return what we have
-        if offset > 1000:
-            logger.warning(
-                "Store %s: offset %d exceeds API limit (1000); "
-                "truncating at %d/%d offers",
-                store_id, offset, len(all_offers), total_hits,
-            )
-            break
-
+    offers = list(all_offers_by_id.values())
     elapsed = time.perf_counter() - t0
     return {
         "storeId": store_id,
-        "totalHits": total_hits or 0,
-        "offers": all_offers,
+        "totalHits": len(offers),
+        "offers": offers,
         "apiCalls": api_calls,
         "elapsedSeconds": round(elapsed, 3),
     }
