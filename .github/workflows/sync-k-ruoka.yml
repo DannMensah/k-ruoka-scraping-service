@@ -8,6 +8,10 @@ on:
   # Manual trigger from GitHub UI / CLI
   workflow_dispatch:
 
+  # Trigger on push to main (temporary — remove after verified)
+  push:
+    branches: [main]
+
   # Backup schedule — every 4 hours
   schedule:
     - cron: '0 2,6,10,14,18,22 * * *'

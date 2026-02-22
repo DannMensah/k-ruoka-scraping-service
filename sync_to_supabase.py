@@ -65,9 +65,29 @@ def _now_iso() -> str:
 
 
 def map_store(store_data: dict) -> dict:
-    """Map a K-Ruoka store dict to a Supabase `stores` row."""
-    location = store_data.get("location", {}) or {}
+    """Map a K-Ruoka store dict to a Supabase `stores` row.
+
+    K-Ruoka API store fields (discovered from real responses):
+        id, name, slug, chainName, geo{latitude, longitude},
+        location (string address), openNextTwoDays, ...
+    """
     geo = store_data.get("geo", {}) or {}
+
+    # `location` can be a string or a dict — handle both
+    location_raw = store_data.get("location")
+    if isinstance(location_raw, dict):
+        street_address = location_raw.get("address")
+        postcode = location_raw.get("postalCode")
+        city = location_raw.get("city")
+    elif isinstance(location_raw, str):
+        street_address = location_raw
+        postcode = None
+        city = None
+    else:
+        street_address = None
+        postcode = None
+        city = None
+
     return {
         "id": f"k-ruoka:{store_data['id']}",
         "remote_id": store_data["id"],
@@ -75,11 +95,11 @@ def map_store(store_data: dict) -> dict:
         "name": store_data["name"],
         "slug": store_data.get("slug"),
         "brand": store_data.get("chainName"),
-        "street_address": location.get("address"),
-        "postcode": location.get("postalCode"),
-        "city": location.get("city"),
-        "latitude": geo.get("lat"),
-        "longitude": geo.get("lon"),
+        "street_address": street_address,
+        "postcode": postcode,
+        "city": city,
+        "latitude": geo.get("latitude"),
+        "longitude": geo.get("longitude"),
         "is_active": True,
         "last_seen_at": _now_iso(),
         "raw_data": store_data,

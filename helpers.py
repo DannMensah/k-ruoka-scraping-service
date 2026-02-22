@@ -867,9 +867,13 @@ def filter_stores_by_distance(
     result = []
     for store in stores:
         geo = store.get("geo")
-        if not geo or geo.get("lat") is None or geo.get("lon") is None:
+        if not geo:
             continue
-        dist = haversine(lat, lon, geo["lat"], geo["lon"])
+        store_lat = geo.get("latitude")
+        store_lon = geo.get("longitude")
+        if store_lat is None or store_lon is None:
+            continue
+        dist = haversine(lat, lon, store_lat, store_lon)
         if dist <= max_km:
             result.append(store)
     return result
@@ -878,18 +882,6 @@ def filter_stores_by_distance(
 def fetch_helsinki_stores() -> list[dict]:
     """Fetch all K-Ruoka stores within 50km of Helsinki."""
     all_stores = fetch_all_stores()
-
-    # Debug: dump first store's keys and geo-related fields
-    if all_stores:
-        s0 = all_stores[0]
-        logger.info("Sample store keys: %s", list(s0.keys()))
-        # Print full first store (truncated)
-        import json as _json
-        logger.info(
-            "Sample store data:\n%s",
-            _json.dumps(s0, indent=2, ensure_ascii=False, default=str)[:3000],
-        )
-
     filtered = filter_stores_by_distance(
         all_stores, HELSINKI_LAT, HELSINKI_LON, MAX_DISTANCE_KM,
     )
