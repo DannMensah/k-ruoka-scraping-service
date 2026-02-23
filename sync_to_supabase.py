@@ -407,7 +407,8 @@ def map_compound_product(
         "valid_to": fields["valid_to"],
         "updated_at": now,
     }
-
+    
+    # if not ean.startswith("2"):  # ---- product row (skip internal EANs starting with '2') ----
     product_row = {
         "ean": ean,
         "name": title,
