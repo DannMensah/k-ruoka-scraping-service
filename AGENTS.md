@@ -1,290 +1,128 @@
 # K-Ruoka Scraping Service
 
-A Flask-based web scraping service that provides APIs to fetch product offers and store information from K-Ruoka (Finnish grocery retailer). Uses DrissionPage (real Chrome via DevTools Protocol) to bypass Cloudflare protection.
+A Python scraping service that syncs K-Ruoka (Finnish grocery retailer) offers to Supabase. Runs as a GitHub Actions workflow. Uses curl_cffi with Chrome TLS impersonation after Cloudflare bypass via FlareSolverr / 2Captcha / Patchright browser.
 
 ## Project Structure
 
-- **scraper.py** - Flask application with API endpoints
-- **helpers.py** - Helper functions for making API requests to K-Ruoka (DrissionPage transport layer)
-- **tests/** - pytest test suite (header validation, helpers, endpoints)
+- **sync_to_supabase.py** - Main sync script (GitHub Actions entry point). Fetches Helsinki-area stores, maps offers to food-vibe schema, upserts to Supabase.
+- **helpers.py** - Transport layer: Cloudflare bypass strategies (FlareSolverr → 2Captcha → browser), curl_cffi HTTP sessions, K-Ruoka API wrappers, geo-filtering.
+- **tests/** - pytest test suite (header validation, helper functions, bulk helpers)
 - **requirements.txt** - Python dependencies
-- **render.yaml** - Render deployment configuration
-- **scripts/** - Simple scripts to call each endpoint locally
-- **examples/** - Example response payloads
+- **scripts/** - Utility scripts for local testing and debugging
+- **examples/** - Example API response payloads
+- **.github/workflows/sync-k-ruoka.yml** - GitHub Actions workflow (triggered by Vercel cron or manually)
 
-## Transport Layer (DrissionPage)
+## Cloudflare Bypass (Transport Layer)
 
-K-Ruoka uses Cloudflare Turnstile protection. The service uses DrissionPage to launch a real Chrome browser and execute `fetch()` calls from within the page context. This inherits Chrome's authentic TLS fingerprint and Cloudflare cookies, bypassing bot detection.
+K-Ruoka uses Cloudflare Turnstile protection. The service resolves CF challenges using a multi-strategy approach, then all subsequent API calls use curl_cffi with Chrome TLS impersonation and the obtained `cf_clearance` cookies.
 
-**How it works:**
+**Bypass strategies (tried in order):**
 
-1. On first API call, Chrome launches and navigates to k-ruoka.fi
-2. If Cloudflare presents a "Verify you are human" challenge, a user must click the checkbox in the Chrome window (one-time per session)
-3. All subsequent API calls use `fetch()` from within the browser page — inherits all cookies and TLS context
-4. A dedicated Chrome profile is stored in `.chrome-profile/` (gitignored)
+1. **FlareSolverr** — free Docker service, runs as a GitHub Actions sidecar
+2. **2Captcha** — paid Turnstile solving (cheap fallback)
+3. **Direct browser** — Patchright with Turnstile auto-click (unreliable last resort)
 
 **Key components in helpers.py:**
 
-- `_get_browser()` — lazy-init ChromiumPage singleton
-- `_wait_for_cloudflare()` — polls page title, warns user to click Turnstile
-- `_js_fetch(method, url, body)` — runs `fetch()` in browser JS context
+- `_ensure_session()` — lazy-init curl_cffi session with CF cookies
+- `_resolve_cloudflare()` — tries each bypass strategy in order
+- `_http_request()` — rate-limited HTTP request with 429 backoff
 - `_FetchResponse` — minimal response wrapper with `.status_code`, `.text`, `.json()`
 - `close_browser()` — cleanup
-
-## Endpoints
-
-### POST `/offer-categories`
-
-Fetches available offer categories for a store.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-
-**Response:** JSON object with `offerCategories` array
-
-### POST `/offer-category`
-
-Fetches product offers for a specific category from K-Ruoka.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-- `category`: Category object with `kind` and `slug` properties
-- `offset`: Pagination offset (default: 0)
-- `limit`: Results limit per page (default: 25)
-- `pricing`: Pricing object (can be empty {})
-
-**Response:** JSON object with `offers` array
-
-### POST `/fetch-offers`
-
-Fetches details for specific offers by offer IDs.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-- `offerIds`: Array of offer IDs to fetch (e.g., ["301851P"])
-- `pricing`: Pricing object (can be empty {})
-
-**Response:** JSON object with offer details
-
-### POST `/related-products`
-
-Fetches related products for a given product.
-
-**Request (JSON):**
-
-- `productId`: Product EAN (e.g., "6410405078872")
-- `storeId`: Store identifier (e.g., "N110")
-- `segmentId`: Segment identifier (default: 1565)
-
-**Response:** JSON object with related products
-
-### POST `/stores-search`
-
-Searches for K-Ruoka store locations.
-
-**Request (JSON):**
-
-- `query`: Search query string (optional)
-- `offset`: Pagination offset (default: 0)
-- `limit`: Results limit (default: 2000)
-
-**Response:** JSON array of matching store locations
-
-### POST `/product-search`
-
-Searches for products by keyword.
-
-**Request (JSON):**
-
-- `query`: Search string (required)
-- `storeId`: Store identifier (required)
-- `language`: Language code (default: "fi")
-- `offset`: Pagination offset (default: 0)
-- `limit`: Results limit (default: 100)
-- `discountFilter`: Filter discounted products (default: false)
-- `isTosTrOffer`: Filter TOS/TR offers (default: false)
-
-**Response:** JSON object with search results
-
-### POST `/search-offers`
-
-Searches offers by category path using the GET search-offers API. With an empty `categoryPath`, returns ALL offers for a store.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (required)
-- `categoryPath`: Category slug (optional, empty = all offers)
-- `offset`: Pagination offset (default: 0)
-- `language`: Language code (default: "fi")
-
-**Response:** `{"totalHits": int, "storeId": str, "results": [...], "categoryName": str, "suggestions": [...]}`
-
-### GET `/health`
-
-Validates that the K-Ruoka API is reachable via the browser transport.
-
-**Response:** `{"ok": true/false, "storesStatus": 200, "searchOffersStatus": 200, "errors": []}`
-
-Returns 200 when all checks pass, 503 when something is broken.
-
-### GET `/bulk/stores`
-
-Returns all K-Ruoka stores in a single call.
-
-**Response:** `{"stores": [...], "count": int}`
-
-### POST `/bulk/store-categories`
-
-Returns all offer categories for a store.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-
-**Response:** `{"storeId": "N110", "categories": [...], "count": int}`
-
-### POST `/bulk/category-offers`
-
-Returns all offers for a single category in a store, handling pagination internally.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-- `categorySlug`: Category slug (e.g., "juomat")
-
-**Response:** `{"storeId": "N110", "category": "juomat", "totalHits": int, "offers": [...], "apiCalls": int, "elapsedSeconds": float}`
-
-### POST `/bulk/store-offers`
-
-Returns ALL offers for a store as a flat list using the search-offers endpoint. This is the **preferred** endpoint for syncing — 43% fewer API calls than the category-by-category approach.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-
-**Response:**
-
-```json
-{
-  "storeId": "N110",
-  "totalHits": 1264,
-  "offers": [...],
-  "apiCalls": 27,
-  "elapsedSeconds": 14.2
-}
-```
-
-### POST `/bulk/store-offers-by-category`
-
-Returns ALL offers for a store grouped by category (old approach). Slower but provides category-level breakdown.
-
-**Request (JSON):**
-
-- `storeId`: Store identifier (e.g., "N110")
-
-**Response:**
-
-```json
-{
-  "storeId": "N110",
-  "categories": [
-    {"category": "slug", "totalHits": 110, "offers": [...], "apiCalls": 5, "elapsedSeconds": 3.2}
-  ],
-  "totalOffers": 928,
-  "totalApiCalls": 60,
-  "totalElapsedSeconds": 35.4
-}
-```
+- `fetch_helsinki_stores()` — geo-filtered stores within 50km of Helsinki
+- `search_all_offers_for_store()` — paginated offer fetching via search-offers API
+- `fetch_offers()` — fetch detailed offer data by offer IDs (used for compound offers)
+
+## GitHub Actions Workflow
+
+The sync runs via `.github/workflows/sync-k-ruoka.yml`:
+
+- **Triggers:** `repository_dispatch` (from Vercel cron), `workflow_dispatch` (manual)
+- **Services:** FlareSolverr Docker sidecar on port 8191
+- **Steps:** Checkout → Python 3.12 → `pip install` → Patchright browsers (fallback) → Xvfb → Wait for FlareSolverr → Restore Chrome profile cache → `python sync_to_supabase.py` → Save Chrome profile cache
+- **Timeout:** 120 minutes
+- **Secrets:** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CAPTCHA_API_KEY` (optional)
+
+## K-Ruoka API Functions (helpers.py)
+
+| Function                                                  | Description                                   |
+| --------------------------------------------------------- | --------------------------------------------- |
+| `fetch_offer_categories(store_id)`                        | Offer categories for a store                  |
+| `fetch_offer_category(store_id, category, offset, limit)` | Paginated offers for a category               |
+| `fetch_offers(store_id, offer_ids)`                       | Detailed offer data by IDs                    |
+| `fetch_related_products(product_id, store_id)`            | Related products                              |
+| `search_stores(query, offset, limit)`                     | Store search                                  |
+| `search_product(query, store_id, ...)`                    | Product keyword search                        |
+| `search_offers(store_id, category_path, offset)`          | Offers by category path                       |
+| `fetch_all_stores()`                                      | All K-Ruoka stores                            |
+| `fetch_all_categories(store_id)`                          | All categories for a store                    |
+| `fetch_all_offers_for_category(store_id, slug)`           | All offers for a category (paginated)         |
+| `search_all_offers_for_store(store_id)`                   | All offers for a store (flat list, preferred) |
+| `fetch_helsinki_stores()`                                 | Stores within 50km of Helsinki                |
+| `validate_api_headers()`                                  | Health-check: verify API is reachable         |
 
 ## K-Ruoka API Constraints
 
-Discovered via benchmarking (see `scripts/full_sweep.py` and `scripts/discover_all.py`):
-
-- **1,060 stores** total
-- **344,203 total offers** across all stores
-- **~26-27 categories** per store
-- **Offers per store:** min 0, max 1,650, mean 325, median 200
+- **1,060 stores** total (~100-150 within Helsinki 50km)
 - **search-offers page size: 48** (returns up to 48 per request)
 - **offer-category max page size: 25** (API returns 400 for limit > 25)
-- **Rate limiting:** implicit — 0.5s delays between calls work reliably
-- **Full sync estimate (search-offers):** ~8,747 API calls, ~146 min sequential
-- **Full sync estimate (offer-category, old):** ~15,343 API calls, ~256 min sequential
+- **Rate limiting:** 0.5s delays between calls work reliably
 - **search-offers saves 43% of API calls** compared to category-by-category
 
-### Store chains
+## Sync Logic (sync_to_supabase.py)
 
-| Chain         | Stores | Total Offers | Avg Offers/Store |
-| ------------- | ------ | ------------ | ---------------- |
-| K-Market      | 722    | 129,629      | 180              |
-| K-Supermarket | 254    | 125,206      | 493              |
-| K-Citymarket  | 84     | 89,368       | 1,064            |
-
-### Recommended sync strategy
-
-1. **Job 1:** `GET /health` → validate transport, `GET /bulk/stores` → save all stores
-2. **Job N:** `POST /bulk/store-offers` with one storeId per invocation (~8-36s each)
-3. Fan out across multiple invocations — each store fits within 1 minute
+1. Fetch Helsinki-area stores → upsert to `stores` table
+2. For each store, fetch all offers via `search_all_offers_for_store()`
+3. Map offers via `map_offer()` or `map_compound_product()`:
+   - **Skip** offers where `availability.store` is `false`
+   - **Skip** offers where `price >= normal_price` (no real discount)
+   - **Expand** compound offers (no embedded product) via `fetch_offers()` → individual product rows
+   - Extract batch unit price from `mobilescan.pricing.batch.unitPrice`
+   - Store `quantity_required` from `mobilescan.pricing.batch.amount`
+   - Reverse `raw_categories` (leaf → top for UI display)
+4. Upsert products (by EAN) → fetch product UUIDs → attach `canonical_product_id`
+5. Upsert offers → delete stale offers
+6. Fail job if >25% of stores error
 
 ## Setup
 
 ### Prerequisites
 
 - Python 3.12+
-- Google Chrome installed
 - Virtual environment
 
 ### Installation
-
-1. Create and activate virtual environment:
 
 ```bash
 python -m venv venv
 .\venv\Scripts\Activate.ps1  # Windows PowerShell
 source venv/bin/activate      # Unix/macOS
-```
-
-2. Install dependencies:
-
-```bash
 pip install -r requirements.txt
 ```
 
-## Running Locally
+### Running Locally
 
 ```bash
-flask --app scraper.py run --debug
+# Set environment variables
+$env:SUPABASE_URL = "..."
+$env:SUPABASE_SERVICE_ROLE_KEY = "..."
+
+# Run sync
+python sync_to_supabase.py
 ```
 
-The service will start at `http://localhost:5000`
-
-On the first API call, Chrome will launch. If Cloudflare shows a challenge, click "Verify you are human" in the Chrome window.
-
-## Scripts
-
-Quick scripts to call each endpoint locally (server must be running):
+### Running Tests
 
 ```bash
-python scripts/offer_categories.py              # default store N110
-python scripts/offer_category.py N110 lihat 10   # custom slug & limit
-python scripts/fetch_offers.py N110 301851P      # fetch specific offer
-python scripts/stores_search.py Helsinki 5       # search stores
-python scripts/related_products.py 6410405078872 # related products
-python scripts/health_check.py                   # health check
-python scripts/bulk_stores.py                    # all stores
-python scripts/bulk_store_offers.py N110         # all offers for a store
-python scripts/search_offers.py N110 juomat      # search offers by category
-python scripts/full_sweep.py 3                   # sweep N stores (default: all)
+python -m pytest tests/ -v
 ```
 
-**Note:** Before reporting that the work is done, test the code using the scripts in the `scripts/` directory.
+Note: Tests require network access and will trigger Cloudflare bypass on first run.
 
 ## Dependencies
 
-- **Flask** - Web framework
-- **DrissionPage** - Chrome automation via DevTools Protocol (bypasses Cloudflare)
-- **gunicorn** - Production WSGI server
-- **requests** - HTTP client (for scripts that call Flask endpoints)
-- **pytest** - Test framework
+- **patchright** — Playwright-based browser automation (Cloudflare bypass fallback)
+- **supabase** — Supabase Python client for DB writes
+- **requests** — HTTP client (for scripts and FlareSolverr calls)
+- **curl_cffi** — HTTP client with Chrome TLS impersonation
+- **pytest** — Test framework

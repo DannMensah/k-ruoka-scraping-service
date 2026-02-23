@@ -1,8 +1,56 @@
-# K-Ruoka Integration Plan
+# K-Ruoka Scraping Service — Implementation Plan
 
-## Overview
+> **Rule**: Refer to this plan after every completed step and after memory compaction.
+> Do NOT finish until every checkbox below is checked.
 
-Refactor the K-Ruoka scraping service to run as a **GitHub Actions workflow** (no Flask server needed for production). Replace DrissionPage with **Patchright** (patched Playwright) for automated Cloudflare Turnstile bypass. Add Haversine geo-filtering to limit scraping to stores within **50 km of Helsinki** (~100–150 stores instead of ~1,060). The workflow writes directly to the food-vibe Supabase database. Food-vibe's Vercel cron triggers the workflow via `repository_dispatch` every 4 hours.
+## Current Sprint — Offer Quality & Compound Offer Support
+
+### Step 1: Skip offers where `availability.store` is `false`
+
+- [x] In `map_offer()`, after extracting `product`, check `product.get("availability", {}).get("store")`. If explicitly `False`, return `(None, None)`.
+- [x] In `sync_store_offers()` loop, skip the offer when `map_offer` returns `(None, None)`.
+
+### Step 2: Skip offers where price == normal price (no actual discount)
+
+- [x] In `map_offer()`, after extracting `price` and `normal_price`, if both are not None and `price >= normal_price`, return `(None, None)`.
+
+### Step 3: Handle compound/multi-product offers
+
+- [x] Detection: in `sync_store_offers()`, identify compound offers as those where `raw_offer.get("product")` is falsy (no product wrapper in offer-category listing).
+- [x] For detected compound offers, call `fetch_offers(store_id, [offer_id])` from helpers.py to get the detailed response with `products` (plural) array.
+- [x] Create `map_compound_product()` function that creates an offer row per-product using: product's own EAN, category tree, mobilescan pricing, availability, images — combined with parent offer's pricing, title, validity. Offer ID: `k-ruoka:{store_id}:{offer_id}:{ean}`.
+- [x] Skip the parent compound offer itself (don't add to `offer_rows`).
+- [x] Each child offer inherits `quantity_required` from `mobilescan.pricing.batch.amount`.
+- [x] Respect availability check (step 1) per individual product.
+- [x] Import `fetch_offers` from helpers.py.
+- [x] Rate limiting: each `fetch_offers` call uses existing global rate limiter via `_post()`.
+
+### Step 4: Batch offer unit price from `mobilescan.pricing.batch`
+
+- [x] In `map_offer()`, when `ms_pricing` has `batch` but no `discount`, extract unit price from `batch.unitPrice.value`.
+- [x] Also extract `valid_from`/`valid_to` from `batch.startDate`/`batch.endDate` when `discount` is absent.
+
+### Step 5: Reverse K-Ruoka `raw_categories` order
+
+- [x] In `map_offer()` and `map_compound_product()`, after building `raw_categories` from `category.tree`, reverse the list (leaf → top, most specific first).
+
+### Step 5.5: Flask cleanup
+
+- [x] Removed `scraper.py` (Flask app — no longer used, service runs via GitHub Actions).
+- [x] Removed `render.yaml` (Render.com deployment config — no longer used).
+- [x] Removed Flask from `requirements.txt`.
+- [x] Removed Flask endpoint tests from `tests/test_service.py`.
+- [x] Updated `AGENTS.md` to reflect current architecture.
+
+### Step 6: Test with 5 stores
+
+- [ ] Run `sync_to_supabase.py` for 5 stores (not full Helsinki set).
+- [ ] Verify DB rows: availability-filtered, price-filtered, compound offers expanded, batch quantities correct, reversed categories.
+- [ ] Check logs for skipped offers.
+
+---
+
+## Previous Plan (completed)
 
 ### Key Numbers (estimated after Helsinki filter)
 

@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import (
     fetch_helsinki_stores,
     search_all_offers_for_store,
+    fetch_offers,
     close_browser,
 )
 from supabase import create_client
@@ -112,8 +113,105 @@ def map_unit(raw_unit: str | None) -> str | None:
     return UNIT_MAP.get(raw_unit.lower().strip())
 
 
-def map_offer(store_id: str, offer: dict) -> tuple[dict, dict | None]:
+def _is_compound_offer(offer: dict) -> bool:
+    """Return True if the offer has no embedded product (compound/multi-product).
+
+    Compound offers in the offer-category listing lack a `product` field and
+    require a separate fetch-offers call to get individual product details.
+    """
+    return not offer.get("product")
+
+
+def _extract_product_fields(product: dict, offer: dict) -> dict:
+    """Extract common fields from a product dict nested in an offer.
+
+    Shared logic between map_offer (single-product) and map_compound_product.
+    Returns a dict with keys: ean, image_url, source_url, raw_categories,
+    unit_price, unit, valid_from, valid_to, quantity_required, ms_pricing.
+    """
+    mobilescan = product.get("mobilescan", {}) or {}
+    ms_pricing = mobilescan.get("pricing", {}) or {}
+
+    # ---- unit price / unit (prefer discount, then batch, then normal) ----
+    unit_price = None
+    unit = None
+
+    discount_up = (ms_pricing.get("discount", {}) or {}).get("unitPrice", {}) or {}
+    batch_up = (ms_pricing.get("batch", {}) or {}).get("unitPrice", {}) or {}
+    normal_up = (ms_pricing.get("normal", {}) or {}).get("unitPrice", {}) or {}
+
+    if discount_up.get("value") is not None:
+        unit_price = discount_up["value"]
+        unit = map_unit(discount_up.get("unit"))
+    elif batch_up.get("value") is not None:
+        unit_price = batch_up["value"]
+        unit = map_unit(batch_up.get("unit"))
+    elif normal_up.get("value") is not None:
+        unit_price = normal_up["value"]
+        unit = map_unit(normal_up.get("unit"))
+
+    # ---- EAN ----
+    ean = product.get("ean")
+    if ean is not None:
+        ean = str(ean).strip()
+        if not ean:
+            ean = None
+
+    # ---- image URL ----
+    images = product.get("images") or []
+    image_url = images[0] if images else offer.get("image")
+
+    # ---- source URL ----
+    url_slug = (product.get("productAttributes", {}) or {}).get("urlSlug")
+    if url_slug:
+        source_url = f"https://www.k-ruoka.fi/kauppa/tuote/{url_slug}"
+    elif ean:
+        source_url = f"https://www.k-ruoka.fi/kauppa/tuotehaku?haku={ean}"
+    else:
+        source_url = None
+
+    # ---- validity dates (prefer discount, fall back to batch) ----
+    discount_info = ms_pricing.get("discount", {}) or {}
+    batch_info = ms_pricing.get("batch", {}) or {}
+    valid_from = discount_info.get("startDate") or batch_info.get("startDate")
+    valid_to = discount_info.get("endDate") or batch_info.get("endDate")
+
+    # ---- categories (reversed: leaf → top for UI display) ----
+    raw_categories = None
+    tree = (product.get("category", {}) or {}).get("tree")
+    if tree and isinstance(tree, list):
+        raw_categories = list(reversed([
+            {
+                "name": (entry.get("localizedName", {}) or {}).get("finnish", ""),
+                "slug": entry.get("slug", ""),
+            }
+            for entry in tree
+        ]))
+
+    # ---- batch / quantity_required ----
+    batch = ms_pricing.get("batch", {}) or {}
+    quantity_required = batch.get("amount", 1) if batch.get("amount") else 1
+
+    return {
+        "ean": ean,
+        "image_url": image_url,
+        "source_url": source_url,
+        "raw_categories": raw_categories,
+        "unit_price": unit_price,
+        "unit": unit,
+        "valid_from": valid_from,
+        "valid_to": valid_to,
+        "quantity_required": quantity_required,
+        "ms_pricing": ms_pricing,
+    }
+
+
+def map_offer(store_id: str, offer: dict) -> tuple[dict | None, dict | None]:
     """Map a K-Ruoka offer to an (offer_row, product_row | None) tuple.
+
+    Returns (None, None) when the offer should be skipped:
+    - product.availability.store is False
+    - price >= normal_price (no actual discount)
 
     Safely navigates all nested fields — missing keys resolve to None.
     """
@@ -131,83 +229,42 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict, dict | None]:
     normal_pricing = offer.get("normalPricing", {}) or {}
     normal_price = normal_pricing.get("price")
 
+    # ---- Skip if price equals or exceeds normal price (no real discount) ----
+    if price is not None and normal_price is not None and price >= normal_price:
+        return None, None
+
     # ---- product & mobilescan ----
     product_wrapper = offer.get("product", {}) or {}
     product = product_wrapper.get("product", {}) or {}
-    mobilescan = product.get("mobilescan", {}) or {}
-    ms_pricing = mobilescan.get("pricing", {}) or {}
 
-    # ---- unit price / unit (prefer discount, then normal) ----
-    unit_price = None
-    unit = None
+    # ---- Skip if product is not available in-store ----
+    availability = product.get("availability", {}) or {}
+    if availability.get("store") is False:
+        return None, None
 
-    discount_up = (ms_pricing.get("discount", {}) or {}).get("unitPrice", {}) or {}
-    normal_up = (ms_pricing.get("normal", {}) or {}).get("unitPrice", {}) or {}
+    fields = _extract_product_fields(product, offer)
 
-    if discount_up.get("value") is not None:
-        unit_price = discount_up["value"]
-        unit = map_unit(discount_up.get("unit"))
-    elif normal_up.get("value") is not None:
-        unit_price = normal_up["value"]
-        unit = map_unit(normal_up.get("unit"))
-
-    # ---- EAN ----
-    ean = product.get("ean") or product_wrapper.get("id")
-    # Normalise — EAN should be a string of digits
+    # Fall back EAN to product_wrapper.id (for single-product offers)
+    ean = fields["ean"] or product_wrapper.get("id")
     if ean is not None:
         ean = str(ean).strip()
         if not ean:
             ean = None
-
-    # ---- image URL ----
-    images = product.get("images") or []
-    image_url = images[0] if images else offer.get("image")
-
-    # ---- source URL ----
-    # Prefer the canonical urlSlug from productAttributes (e.g. "lajitelma-40240580")
-    url_slug = (product.get("productAttributes", {}) or {}).get("urlSlug")
-    if url_slug:
-        source_url = f"https://www.k-ruoka.fi/kauppa/tuote/{url_slug}"
-    elif ean:
-        source_url = f"https://www.k-ruoka.fi/kauppa/tuotehaku?haku={ean}"
-    else:
-        source_url = None
-
-    # ---- validity dates from mobilescan discount ----
-    discount_info = (ms_pricing.get("discount", {}) or {})
-    valid_from = discount_info.get("startDate")
-    valid_to = discount_info.get("endDate")
-
-    # ---- categories ----
-    raw_categories = None
-    tree = (product.get("category", {}) or {}).get("tree")
-    if tree and isinstance(tree, list):
-        raw_categories = [
-            {
-                "name": (entry.get("localizedName", {}) or {}).get("finnish", ""),
-                "slug": entry.get("slug", ""),
-            }
-            for entry in tree
-        ]
-
-    # ---- batch / quantity_required ----
-    batch = ms_pricing.get("batch", {}) or {}
-    quantity_required = batch.get("amount", 1) if batch.get("amount") else 1
 
     offer_row = {
         "id": f"k-ruoka:{store_id}:{offer_id}",
         "store_id": f"k-ruoka:{store_id}",
         "title": title,
         "price": price,
-        "unit_price": unit_price,
-        "unit": unit,
+        "unit_price": fields["unit_price"],
+        "unit": fields["unit"],
         "normal_price": normal_price,
-        "quantity_required": quantity_required,
-        "source_url": source_url,
-        "image_url": image_url,
-        "raw_categories": raw_categories,
-        "valid_from": valid_from,
-        "valid_to": valid_to,
+        "quantity_required": fields["quantity_required"],
+        "source_url": fields["source_url"],
+        "image_url": fields["image_url"],
+        "raw_categories": fields["raw_categories"],
+        "valid_from": fields["valid_from"],
+        "valid_to": fields["valid_to"],
         "updated_at": now,
         # canonical_product_id is set later after product upsert
     }
@@ -218,7 +275,78 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict, dict | None]:
         product_row = {
             "ean": ean,
             "name": title,
-            "image_url": image_url,
+            "image_url": fields["image_url"],
+        }
+
+    return offer_row, product_row
+
+
+def map_compound_product(
+    store_id: str,
+    offer: dict,
+    product_wrapper: dict,
+) -> tuple[dict | None, dict | None]:
+    """Map one product from a compound (multi-product) offer.
+
+    Returns (offer_row, product_row | None) or (None, None) if skipped.
+    The offer ID includes the EAN to ensure uniqueness per product.
+    """
+    offer_id = offer.get("id", "unknown")
+    now = _now_iso()
+
+    product = product_wrapper.get("product", {}) or {}
+
+    # ---- Skip if product is not available in-store ----
+    availability = product.get("availability", {}) or {}
+    if availability.get("store") is False:
+        return None, None
+
+    # ---- title (prefer product-level name, fall back to offer title) ----
+    product_name = (product.get("localizedName", {}) or {}).get("finnish")
+    loc_title = offer.get("localizedTitle", {}) or {}
+    offer_title = loc_title.get("finnish") or loc_title.get("english") or "Unknown"
+    title = product_name or offer_title
+
+    # ---- top-level pricing (from parent offer) ----
+    pricing = offer.get("pricing", {}) or {}
+    price = pricing.get("price")
+
+    normal_pricing = offer.get("normalPricing", {}) or {}
+    normal_price = normal_pricing.get("price")
+
+    # ---- Skip if price equals or exceeds normal price ----
+    if price is not None and normal_price is not None and price >= normal_price:
+        return None, None
+
+    fields = _extract_product_fields(product, offer)
+    ean = fields["ean"]
+
+    if not ean:
+        return None, None
+
+    offer_row = {
+        "id": f"k-ruoka:{store_id}:{offer_id}:{ean}",
+        "store_id": f"k-ruoka:{store_id}",
+        "title": title,
+        "price": price,
+        "unit_price": fields["unit_price"],
+        "unit": fields["unit"],
+        "normal_price": normal_price,
+        "quantity_required": fields["quantity_required"],
+        "source_url": fields["source_url"],
+        "image_url": fields["image_url"],
+        "raw_categories": fields["raw_categories"],
+        "valid_from": fields["valid_from"],
+        "valid_to": fields["valid_to"],
+        "updated_at": now,
+    }
+
+    product_row = None
+    if not ean.startswith("2"):
+        product_row = {
+            "ean": ean,
+            "name": title,
+            "image_url": fields["image_url"],
         }
 
     return offer_row, product_row
@@ -332,15 +460,64 @@ def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
     offer_rows: list[dict] = []
     product_rows_map: dict[str, dict] = {}  # deduplicate by EAN
     offer_ean_map: dict[str, str] = {}  # offer_id → EAN (for canonical_product_id lookup)
+    skipped_availability = 0
+    skipped_same_price = 0
+    compound_count = 0
+    compound_products = 0
+
+    def _add_mapped(offer_row: dict | None, product_row: dict | None) -> None:
+        """Append a mapped offer/product pair, tracking skips."""
+        if offer_row is None:
+            return
+        offer_rows.append(offer_row)
+        if product_row:
+            offer_ean_map[offer_row["id"]] = product_row["ean"]
+            if product_row["ean"] not in product_rows_map:
+                product_rows_map[product_row["ean"]] = product_row
 
     for raw_offer in offers_raw:
         try:
+            # ---- Compound offer detection ----
+            if _is_compound_offer(raw_offer):
+                compound_count += 1
+                offer_id = raw_offer.get("id", "?")
+                try:
+                    detail = fetch_offers(store_id, [offer_id])
+                    detail_offers = detail.get("offers", [])
+                    if not detail_offers:
+                        logger.debug("Store %s: compound offer %s returned no detail", store_id, offer_id)
+                        continue
+                    detail_offer = detail_offers[0]
+                    products_list = detail_offer.get("products", [])
+                    if not products_list:
+                        logger.debug("Store %s: compound offer %s has no products", store_id, offer_id)
+                        continue
+                    for pw in products_list:
+                        o_row, p_row = map_compound_product(store_id, detail_offer, pw)
+                        if o_row is None:
+                            skipped_availability += 1
+                            continue
+                        _add_mapped(o_row, p_row)
+                        compound_products += 1
+                except Exception:
+                    logger.warning(
+                        "Store %s: failed to expand compound offer %s, skipping",
+                        store_id, offer_id, exc_info=True,
+                    )
+                continue
+
+            # ---- Regular single-product offer ----
             offer_row, product_row = map_offer(store_id, raw_offer)
-            offer_rows.append(offer_row)
-            if product_row:
-                offer_ean_map[offer_row["id"]] = product_row["ean"]
-                if product_row["ean"] not in product_rows_map:
-                    product_rows_map[product_row["ean"]] = product_row
+            if offer_row is None:
+                # Determine reason for skip (for logging)
+                p = (raw_offer.get("pricing", {}) or {}).get("price")
+                np = (raw_offer.get("normalPricing", {}) or {}).get("price")
+                if p is not None and np is not None and p >= np:
+                    skipped_same_price += 1
+                else:
+                    skipped_availability += 1
+                continue
+            _add_mapped(offer_row, product_row)
         except Exception:
             logger.warning(
                 "Store %s: failed to map offer %s, skipping",
@@ -348,6 +525,14 @@ def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
                 raw_offer.get("id", "?"),
                 exc_info=True,
             )
+
+    if skipped_availability or skipped_same_price or compound_count:
+        logger.info(
+            "Store %s: skipped %d (availability) + %d (same-price), "
+            "expanded %d compound offers → %d products",
+            store_id, skipped_availability, skipped_same_price,
+            compound_count, compound_products,
+        )
 
     # 3. Upsert products
     product_rows = list(product_rows_map.values())

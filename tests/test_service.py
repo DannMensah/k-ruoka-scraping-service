@@ -5,7 +5,6 @@ Covers:
   - API connectivity validation (catches stale build numbers / experiments)
   - Individual helper functions
   - Bulk helper functions (search-offers and category-based)
-  - Flask endpoint integration tests
   - Response-shape contracts so breakages are caught early
 
 Run:
@@ -34,20 +33,11 @@ from helpers import (
     search_all_offers_for_store,
     validate_api_headers,
 )
-from scraper import app
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
-
-@pytest.fixture(scope="module")
-def client():
-    """Flask test client."""
-    app.config["TESTING"] = True
-    with app.test_client() as c:
-        yield c
-
 
 @pytest.fixture(scope="module")
 def sample_store_id():
@@ -293,106 +283,3 @@ class TestBulkHelpers:
             f"Expected fewer than 40 API calls, got {search_result['apiCalls']}"
         )
 
-
-# ---------------------------------------------------------------------------
-# 4. Flask endpoint integration tests
-# ---------------------------------------------------------------------------
-
-class TestEndpoints:
-    def test_health_ok(self, client):
-        resp = client.get("/health")
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert data["ok"] is True
-
-    def test_bulk_stores(self, client):
-        time.sleep(0.5)
-        resp = client.get("/bulk/stores")
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert "stores" in data
-        assert "count" in data
-        assert data["count"] > 0
-        assert len(data["stores"]) == data["count"]
-
-    def test_bulk_store_categories(self, client, sample_store_id):
-        time.sleep(0.5)
-        resp = client.post("/bulk/store-categories", json={"storeId": sample_store_id})
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert data["storeId"] == sample_store_id
-        assert data["count"] > 0
-        assert len(data["categories"]) == data["count"]
-
-    def test_bulk_store_categories_missing_store_id(self, client):
-        resp = client.post("/bulk/store-categories", json={})
-        assert resp.status_code == 400
-
-    def test_bulk_category_offers(self, client, sample_store_id):
-        time.sleep(0.5)
-        resp = client.post("/bulk/category-offers", json={
-            "storeId": sample_store_id,
-            "categorySlug": "juomat",
-        })
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert data["storeId"] == sample_store_id
-        assert data["category"] == "juomat"
-        assert data["totalHits"] > 0
-        assert len(data["offers"]) == data["totalHits"]
-
-    def test_bulk_category_offers_missing_params(self, client):
-        resp = client.post("/bulk/category-offers", json={"storeId": "N110"})
-        assert resp.status_code == 400
-
-    def test_bulk_store_offers(self, client, sample_store_id):
-        """POST /bulk/store-offers returns flat list via search-offers."""
-        time.sleep(0.5)
-        resp = client.post("/bulk/store-offers", json={"storeId": sample_store_id})
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert data["storeId"] == sample_store_id
-        assert data["totalHits"] > 0
-        assert isinstance(data["offers"], list)
-        assert len(data["offers"]) == data["totalHits"]
-        assert data["apiCalls"] >= 1
-        assert data["elapsedSeconds"] > 0
-
-    def test_bulk_store_offers_missing_store_id(self, client):
-        resp = client.post("/bulk/store-offers", json={})
-        assert resp.status_code == 400
-
-    def test_bulk_store_offers_by_category(self, client, sample_store_id):
-        """POST /bulk/store-offers-by-category returns grouped results."""
-        time.sleep(0.5)
-        resp = client.post("/bulk/store-offers-by-category", json={"storeId": sample_store_id})
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert data["storeId"] == sample_store_id
-        assert data["totalOffers"] > 0
-        assert data["totalApiCalls"] > 0
-        assert isinstance(data["categories"], list)
-        assert len(data["categories"]) > 0
-
-    def test_search_offers_endpoint(self, client, sample_store_id):
-        """POST /search-offers returns search results."""
-        time.sleep(0.5)
-        resp = client.post("/search-offers", json={
-            "storeId": sample_store_id,
-            "categoryPath": "juomat",
-        })
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert "totalHits" in data
-        assert "results" in data
-
-    # Existing endpoints still work
-    def test_stores_search_endpoint(self, client):
-        time.sleep(0.5)
-        resp = client.post("/stores-search", json={"query": "", "limit": 2})
-        assert resp.status_code == 200
-
-    def test_offer_categories_endpoint(self, client, sample_store_id):
-        time.sleep(0.5)
-        resp = client.post("/offer-categories", json={"storeId": sample_store_id})
-        assert resp.status_code == 200
