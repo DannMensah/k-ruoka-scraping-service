@@ -45,6 +45,7 @@ atexit.register(close_browser)
 
 SOURCE = "k-ruoka"
 BATCH_SIZE = 500  # Supabase upsert batch size
+COMPOUND_FETCH_BATCH = 25  # Max offer IDs per fetch-offers API call
 
 UNIT_MAP = {
     "kpl": "pcs", "st": "pcs", "pcs": "pcs",
@@ -475,35 +476,16 @@ def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
             if product_row["ean"] not in product_rows_map:
                 product_rows_map[product_row["ean"]] = product_row
 
+    # ---- First pass: process regular offers, collect compound offer IDs ----
+    compound_offer_ids: list[str] = []
+
     for raw_offer in offers_raw:
         try:
-            # ---- Compound offer detection ----
             if _is_compound_offer(raw_offer):
                 compound_count += 1
                 offer_id = raw_offer.get("id", "?")
-                try:
-                    detail = fetch_offers(store_id, [offer_id])
-                    detail_offers = detail.get("offers", [])
-                    if not detail_offers:
-                        logger.debug("Store %s: compound offer %s returned no detail", store_id, offer_id)
-                        continue
-                    detail_offer = detail_offers[0]
-                    products_list = detail_offer.get("products", [])
-                    if not products_list:
-                        logger.debug("Store %s: compound offer %s has no products", store_id, offer_id)
-                        continue
-                    for pw in products_list:
-                        o_row, p_row = map_compound_product(store_id, detail_offer, pw)
-                        if o_row is None:
-                            skipped_availability += 1
-                            continue
-                        _add_mapped(o_row, p_row)
-                        compound_products += 1
-                except Exception:
-                    logger.warning(
-                        "Store %s: failed to expand compound offer %s, skipping",
-                        store_id, offer_id, exc_info=True,
-                    )
+                if offer_id != "?":
+                    compound_offer_ids.append(offer_id)
                 continue
 
             # ---- Regular single-product offer ----
@@ -525,6 +507,44 @@ def sync_store_offers(supabase, store_id: str, sync_time: str) -> int:
                 raw_offer.get("id", "?"),
                 exc_info=True,
             )
+
+    # ---- Batch-fetch compound offers (multiple IDs per API call) ----
+    if compound_offer_ids:
+        logger.info(
+            "Store %s: batch-fetching %d compound offers in %d call(s)",
+            store_id,
+            len(compound_offer_ids),
+            (len(compound_offer_ids) + COMPOUND_FETCH_BATCH - 1) // COMPOUND_FETCH_BATCH,
+        )
+        for batch_ids in _chunked(compound_offer_ids, COMPOUND_FETCH_BATCH):
+            try:
+                detail = fetch_offers(store_id, batch_ids)
+                detail_offers = detail.get("offers", [])
+
+                # Build a lookup so we can match returned offers to IDs
+                for detail_offer in detail_offers:
+                    detail_id = detail_offer.get("id")
+                    products_list = detail_offer.get("products", [])
+                    if not products_list:
+                        logger.debug(
+                            "Store %s: compound offer %s has no products",
+                            store_id, detail_id,
+                        )
+                        continue
+                    for pw in products_list:
+                        o_row, p_row = map_compound_product(
+                            store_id, detail_offer, pw,
+                        )
+                        if o_row is None:
+                            skipped_availability += 1
+                            continue
+                        _add_mapped(o_row, p_row)
+                        compound_products += 1
+            except Exception:
+                logger.warning(
+                    "Store %s: failed to batch-fetch compound offers %s, skipping",
+                    store_id, batch_ids, exc_info=True,
+                )
 
     if skipped_availability or skipped_same_price or compound_count:
         logger.info(

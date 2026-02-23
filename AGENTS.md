@@ -67,6 +67,7 @@ The sync runs via `.github/workflows/sync-k-ruoka.yml`:
 - **search-offers page size: 48** (returns up to 48 per request)
 - **offer-category max page size: 25** (API returns 400 for limit > 25)
 - **Rate limiting:** 0.5s delays between calls work reliably
+- **fetch-offers batch:** accepts multiple offer IDs per call; batched at 25 IDs per request
 - **search-offers saves 43% of API calls** compared to category-by-category
 
 ## Sync Logic (sync_to_supabase.py)
@@ -76,7 +77,7 @@ The sync runs via `.github/workflows/sync-k-ruoka.yml`:
 3. Map offers via `map_offer()` or `map_compound_product()`:
    - **Skip** offers where `availability.store` is `false`
    - **Skip** offers where `price >= normal_price` (no real discount)
-   - **Expand** compound offers (no embedded product) via `fetch_offers()` → individual product rows
+   - **Batch-expand** compound offers (no embedded product) via `fetch_offers()` with up to 25 IDs per call → individual product rows
    - Extract batch unit price from `mobilescan.pricing.batch.unitPrice`
    - Store `quantity_required` from `mobilescan.pricing.batch.amount`
    - Reverse `raw_categories` (leaf → top for UI display)
