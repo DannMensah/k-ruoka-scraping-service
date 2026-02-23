@@ -408,13 +408,11 @@ def map_compound_product(
         "updated_at": now,
     }
 
-    product_row = None
-    if not ean.startswith("2"):
-        product_row = {
-            "ean": ean,
-            "name": title,
-            "image_url": fields["image_url"],
-        }
+    product_row = {
+        "ean": ean,
+        "name": title,
+        "image_url": fields["image_url"],
+    }
 
     return offer_row, product_row
 
