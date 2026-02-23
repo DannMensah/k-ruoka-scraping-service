@@ -247,10 +247,6 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict | None, dict | None]:
         ms = (product.get("mobilescan", {}) or {}).get("pricing", {}) or {}
         normal_price = (ms.get("normal", {}) or {}).get("price")
 
-    # ---- Skip if price equals or exceeds normal price (no real discount) ----
-    if price is not None and normal_price is not None and price >= normal_price:
-        return None, None
-
     # ---- Skip if price is still None after all fallbacks ----
     if price is None:
         return None, None
@@ -261,6 +257,16 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict | None, dict | None]:
         return None, None
 
     fields = _extract_product_fields(product, offer)
+    qty = fields["quantity_required"]
+
+    # Scale normal_price to batch total so it's comparable to price
+    # (normalPricing.price is per-item, pricing.price is batch total)
+    if normal_price is not None and qty > 1:
+        normal_price = round(normal_price * qty, 2)
+
+    # ---- Skip if price equals or exceeds normal price (no real discount) ----
+    if price is not None and normal_price is not None and price >= normal_price:
+        return None, None
 
     # Fall back EAN to product_wrapper.id (for single-product offers)
     ean = fields["ean"] or product_wrapper.get("id")
@@ -342,10 +348,6 @@ def map_compound_product(
         ms = (product.get("mobilescan", {}) or {}).get("pricing", {}) or {}
         normal_price = (ms.get("normal", {}) or {}).get("price")
 
-    # ---- Skip if price equals or exceeds normal price ----
-    if price is not None and normal_price is not None and price >= normal_price:
-        return None, None
-
     # ---- Skip if price is still None after all fallbacks ----
     if price is None:
         return None, None
@@ -354,6 +356,17 @@ def map_compound_product(
     ean = fields["ean"]
 
     if not ean:
+        return None, None
+
+    qty = fields["quantity_required"]
+
+    # Scale normal_price to batch total so it's comparable to price
+    # (normalPricing.price is per-item, pricing.price is batch total)
+    if normal_price is not None and qty > 1:
+        normal_price = round(normal_price * qty, 2)
+
+    # ---- Skip if price equals or exceeds normal price (no real discount) ----
+    if price is not None and normal_price is not None and price >= normal_price:
         return None, None
 
     offer_row = {
