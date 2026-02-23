@@ -103,14 +103,54 @@ pip install -r requirements.txt
 
 ### Running Locally
 
-```bash
-# Set environment variables
+The GitHub Actions workflow uses FlareSolverr (Docker) for Cloudflare bypass. To replicate locally:
+
+```powershell
+# 1. Start FlareSolverr (requires Docker Desktop)
+docker run -d --name flaresolverr -p 8191:8191 -e LOG_LEVEL=info -e TZ=Europe/Helsinki ghcr.io/flaresolverr/flaresolverr:latest
+
+# 2. Set environment variables
+$env:FLARESOLVERR_URL = "http://localhost:8191/v1"
 $env:SUPABASE_URL = "..."
 $env:SUPABASE_SERVICE_ROLE_KEY = "..."
 
-# Run sync
+# 3. Activate venv
+.\venv\Scripts\Activate.ps1
+
+# 4. Verify API is reachable through FlareSolverr
+python -c "from helpers import validate_api_headers; print(validate_api_headers())"
+
+# 5. Run full sync
 python sync_to_supabase.py
 ```
+
+> ⚠️ **Full sync takes ~1-2 hours** (100-150 stores, ~60-90s each). For development and testing, use the profiling script with 1-2 stores instead (see below).
+
+### Profiling & Testing with Few Stores
+
+Use `scripts/profile_batching.py` to test the pipeline without writing to Supabase. It profiles fetch, mapping, and compound-offer batching for specific stores.
+
+```powershell
+# Test with 1-2 stores (takes ~1-3 min per store)
+python scripts/profile_batching.py N110 N111
+```
+
+**Typical performance per store (measured 2026-02-23):**
+
+| Phase                                            | Time       | Notes                                 |
+| ------------------------------------------------ | ---------- | ------------------------------------- |
+| Fetch all offers (`search_all_offers_for_store`) | 40-65s     | 57-63 API calls, rate-limited at 0.5s |
+| Map regular offers                               | 4-6ms      | ~10-14 µs/offer, negligible           |
+| Batch-fetch compound offers                      | 20-22s     | 19-21 batched calls (25 IDs each)     |
+| Map compound products                            | 9-11ms     | ~6.5 µs/product, negligible           |
+| **Total per store**                              | **60-90s** | Network I/O is 99.9%+ of runtime      |
+
+**Key findings:**
+
+- Mapping/processing is negligible (<20ms total per store)
+- All time is spent in network I/O (API calls with 0.5s rate limit)
+- Compound offer batching (25 IDs/call) reduces compound fetch from ~500 calls to ~20 calls per store
+- The 0.5s rate limit is at its minimum — do not reduce further
 
 ### Running Tests
 

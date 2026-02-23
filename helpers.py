@@ -38,6 +38,7 @@ RETRY_BACKOFF = 1.5             # seconds, multiplied by attempt number
 GLOBAL_MIN_INTERVAL = 0.5       # seconds between requests (~2 req/s)
 MAX_429_RETRIES = 4              # retry attempts on HTTP 429
 INITIAL_429_BACKOFF = 15.0       # first 429 backoff; doubles each retry
+MAX_403_RETRIES = 1              # re-auth attempts on HTTP 403
 
 # Helsinki geo-filtering
 HELSINKI_LAT = 60.1699
@@ -498,6 +499,36 @@ def close_browser():
     _initialised = False
 
 
+def _re_authenticate():
+    """Invalidate current CF session and re-resolve Cloudflare.
+
+    Called when a 403 response suggests the CF cookies have expired.
+    Resets the global init flag so the next ``_ensure_session()`` call
+    triggers a fresh CF bypass.
+    """
+    global _initialised, _cf_cookies, _cf_user_agent
+    logger.warning("Re-authenticating — resetting CF session...")
+
+    # Close current thread session
+    s = getattr(_thread_local, "session", None)
+    if s is not None:
+        try:
+            s.close()
+        except Exception:
+            pass
+        _thread_local.session = None
+
+    # Reset global state so _ensure_session() re-resolves CF
+    with _init_lock:
+        _cf_cookies = {}
+        _cf_user_agent = ""
+        _initialised = False
+
+    # Trigger fresh CF bypass + session creation
+    _ensure_session()
+    logger.info("Re-authentication complete — new CF session established")
+
+
 # ---------------------------------------------------------------------------
 # HTTP transport (uses curl_cffi session with CF cookies)
 # ---------------------------------------------------------------------------
@@ -541,8 +572,10 @@ def _rate_limit_wait():
 def _http_request(
     method: str, url: str, body: dict | None = None,
 ) -> _FetchResponse:
-    """Make an HTTP request with global rate limiting and 429 retry."""
+    """Make an HTTP request with global rate limiting, 429 retry, and 403 re-auth."""
     global _last_request_time
+
+    retries_403 = 0
 
     for attempt in range(MAX_429_RETRIES + 1):
         _rate_limit_wait()
@@ -552,6 +585,20 @@ def _http_request(
             resp = session.get(url)
         else:
             resp = session.post(url, json=body)
+
+        # 403 Forbidden — likely expired CF cookies, re-authenticate once
+        if resp.status_code == 403 and retries_403 < MAX_403_RETRIES:
+            retries_403 += 1
+            logger.warning(
+                "HTTP 403 — CF cookies may have expired, re-authenticating "
+                "(attempt %d/%d)", retries_403, MAX_403_RETRIES,
+            )
+            try:
+                _re_authenticate()
+            except Exception as e:
+                logger.error("Re-authentication failed: %s", e)
+                return _FetchResponse(resp.status_code, resp.text)
+            continue
 
         if resp.status_code != 429:
             return _FetchResponse(resp.status_code, resp.text)

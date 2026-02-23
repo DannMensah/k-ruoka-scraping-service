@@ -213,6 +213,7 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict | None, dict | None]:
     Returns (None, None) when the offer should be skipped:
     - product.availability.store is False
     - price >= normal_price (no actual discount)
+    - price is still None after all fallbacks
 
     Safely navigates all nested fields — missing keys resolve to None.
     """
@@ -230,13 +231,29 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict | None, dict | None]:
     normal_pricing = offer.get("normalPricing", {}) or {}
     normal_price = normal_pricing.get("price")
 
+    # ---- product & mobilescan ----
+    product_wrapper = offer.get("product", {}) or {}
+    product = product_wrapper.get("product", {}) or {}
+
+    # ---- Price fallback: top-level → discount → batch ----
+    # Many offers (esp. Plussa percentage-based) have no top-level price.
+    # The real price lives inside mobilescan.pricing.discount or .batch.
+    if price is None:
+        ms = (product.get("mobilescan", {}) or {}).get("pricing", {}) or {}
+        price = (ms.get("discount", {}) or {}).get("price")
+        if price is None:
+            price = (ms.get("batch", {}) or {}).get("price")
+    if normal_price is None:
+        ms = (product.get("mobilescan", {}) or {}).get("pricing", {}) or {}
+        normal_price = (ms.get("normal", {}) or {}).get("price")
+
     # ---- Skip if price equals or exceeds normal price (no real discount) ----
     if price is not None and normal_price is not None and price >= normal_price:
         return None, None
 
-    # ---- product & mobilescan ----
-    product_wrapper = offer.get("product", {}) or {}
-    product = product_wrapper.get("product", {}) or {}
+    # ---- Skip if price is still None after all fallbacks ----
+    if price is None:
+        return None, None
 
     # ---- Skip if product is not available in-store ----
     availability = product.get("availability", {}) or {}
@@ -315,8 +332,22 @@ def map_compound_product(
     normal_pricing = offer.get("normalPricing", {}) or {}
     normal_price = normal_pricing.get("price")
 
+    # ---- Price fallback: top-level → discount → batch ----
+    if price is None:
+        ms = (product.get("mobilescan", {}) or {}).get("pricing", {}) or {}
+        price = (ms.get("discount", {}) or {}).get("price")
+        if price is None:
+            price = (ms.get("batch", {}) or {}).get("price")
+    if normal_price is None:
+        ms = (product.get("mobilescan", {}) or {}).get("pricing", {}) or {}
+        normal_price = (ms.get("normal", {}) or {}).get("price")
+
     # ---- Skip if price equals or exceeds normal price ----
     if price is not None and normal_price is not None and price >= normal_price:
+        return None, None
+
+    # ---- Skip if price is still None after all fallbacks ----
+    if price is None:
         return None, None
 
     fields = _extract_product_fields(product, offer)
