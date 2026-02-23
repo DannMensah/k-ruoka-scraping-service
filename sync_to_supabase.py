@@ -123,12 +123,22 @@ def _is_compound_offer(offer: dict) -> bool:
     return not offer.get("product")
 
 
-def _extract_product_fields(product: dict, offer: dict) -> dict:
+def _extract_product_fields(
+    product: dict,
+    offer: dict,
+    effective_price: float | None = None,
+) -> dict:
     """Extract common fields from a product dict nested in an offer.
 
     Shared logic between map_offer (single-product) and map_compound_product.
     Returns a dict with keys: ean, image_url, source_url, raw_categories,
     unit_price, unit, valid_from, valid_to, quantity_required, ms_pricing.
+
+    ``effective_price`` is the resolved offer-level price.  When supplied the
+    function compares it with ``mobilescan.pricing.batch.price`` to decide
+    whether this offer is actually a batch deal.  Without the comparison the
+    batch amount would be applied to *every* offer for a product that has a
+    concurrent batch campaign – even plain per-unit discounts.
     """
     mobilescan = product.get("mobilescan", {}) or {}
     ms_pricing = mobilescan.get("pricing", {}) or {}
@@ -190,8 +200,20 @@ def _extract_product_fields(product: dict, offer: dict) -> dict:
         ]))
 
     # ---- batch / quantity_required ----
+    # Only mark the offer as a batch deal when the resolved offer price
+    # matches the batch price from mobilescan.  A product can participate in
+    # both a per-unit discount AND a batch campaign at the same time; using
+    # the batch amount unconditionally would mis-label the per-unit offer.
     batch = ms_pricing.get("batch", {}) or {}
-    quantity_required = batch.get("amount", 1) if batch.get("amount") else 1
+    batch_price = batch.get("price")
+    if (
+        batch_price is not None
+        and effective_price is not None
+        and abs(effective_price - batch_price) < 0.02
+    ):
+        quantity_required = batch.get("amount", 1) if batch.get("amount") else 1
+    else:
+        quantity_required = 1
 
     return {
         "ean": ean,
@@ -256,7 +278,7 @@ def map_offer(store_id: str, offer: dict) -> tuple[dict | None, dict | None]:
     if availability.get("store") is False:
         return None, None
 
-    fields = _extract_product_fields(product, offer)
+    fields = _extract_product_fields(product, offer, effective_price=price)
     qty = fields["quantity_required"]
 
     # Scale normal_price to batch total so it's comparable to price
@@ -352,7 +374,7 @@ def map_compound_product(
     if price is None:
         return None, None
 
-    fields = _extract_product_fields(product, offer)
+    fields = _extract_product_fields(product, offer, effective_price=price)
     ean = fields["ean"]
 
     if not ean:
