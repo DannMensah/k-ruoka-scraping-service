@@ -34,6 +34,9 @@ jobs:
       FLARESOLVERR_URL: http://localhost:8191/v1
       # 2Captcha (fallback CF bypass — optional, cheap)
       CAPTCHA_API_KEY: ${{ secrets.CAPTCHA_API_KEY }}
+      # food-vibe rebuild-merged webhook (optional — best-effort trigger)
+      FOOD_VIBE_BASE_URL: ${{ secrets.FOOD_VIBE_BASE_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
       # Xvfb for Patchright browser fallback
       DISPLAY: ":99"
 

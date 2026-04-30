@@ -22,6 +22,8 @@ import logging
 import atexit
 from datetime import datetime, timezone
 
+import requests
+
 # Add parent directory to path for helpers import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -711,14 +713,53 @@ def main() -> None:
     logger.info("  Elapsed       : %.1f s (%.1f min)", elapsed, elapsed / 60)
     logger.info("=" * 60)
 
+    # ---- 5. Trigger merged_products rebuild on food-vibe (best-effort) ----
+    trigger_merged_rebuild()
+
     # Fail the GH Actions job if too many stores errored out (> 25%)
     if errors and len(errors) > len(stores) * 0.25:
         logger.error(
-            "Too many errors (%d/%d stores failed) — exiting with code 1",
+            "Too many errors (%d/%d stores failed) \u2014 exiting with code 1",
             len(errors),
             len(stores),
         )
         sys.exit(1)
+
+
+def trigger_merged_rebuild() -> None:
+    """POST to the food-vibe rebuild-merged webhook so the precomputed
+    discounts table reflects the new offers immediately.
+
+    Best-effort: any failure logs a warning but never fails the sync job.
+    The Vercel safety-net cron (every 30 min) will re-trigger soon after.
+    """
+    base_url = os.environ.get("FOOD_VIBE_BASE_URL")
+    secret = os.environ.get("CRON_SECRET")
+
+    if not base_url or not secret:
+        logger.warning(
+            "Skipping merged_products rebuild trigger: "
+            "FOOD_VIBE_BASE_URL or CRON_SECRET not set"
+        )
+        return
+
+    url = base_url.rstrip("/") + "/api/cron/rebuild-merged"
+    try:
+        response = requests.post(
+            url,
+            headers={"Authorization": f"Bearer {secret}"},
+            timeout=60,
+        )
+        if response.ok:
+            logger.info("Triggered merged_products rebuild (%s)", response.status_code)
+        else:
+            logger.warning(
+                "merged_products rebuild trigger returned %s: %s",
+                response.status_code,
+                response.text[:200],
+            )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("merged_products rebuild trigger failed: %s", exc)
 
 
 if __name__ == "__main__":
